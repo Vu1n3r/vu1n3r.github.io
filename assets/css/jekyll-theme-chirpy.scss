@@ -14,7 +14,9 @@
 .post-tags,
 .post-meta,
 .dynamic-title,
-.me-auto{
+.me-auto,
+#h_0,
+#tags{
   direction: rtl;
 }
 
@@ -23,4 +25,8 @@
 .content h2,
 .content h3{
   direction: rtl;
+}
+
+.category-trigger{
+  transform: rotate(180deg);
 }
