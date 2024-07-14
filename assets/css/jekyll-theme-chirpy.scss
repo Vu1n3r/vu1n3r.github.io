@@ -1,0 +1,26 @@
+---
+---
+
+@import 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* append your custom style below */
+.post_head,
+.post_date,
+.post_date,
+.post-tags,
+.post-meta,
+.dynamic-title,
+.me-auto{
+  direction: rtl;
+}
+
+.content p,
+.content h1,
+.content h2,
+.content h3{
+  direction: rtl;
+}
