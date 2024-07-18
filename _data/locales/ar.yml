@@ -30,9 +30,7 @@ panel:
 copyright:
   # Shown at the bottom of the post
   license:
-    template: هذا المنشور تحت ترخيص :LICENSE_NAME بواسطة المؤلف.
-    name: CC BY 4.0
-    link: https://creativecommons.org/licenses/by/4.0/
+    template: عندك كامل الصلاحية لنشر أو التعليق على هذا المقال
 
   # Displayed in the footer
   brief: بعض الحقوق محفوظة.
