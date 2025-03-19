@@ -1,8 +1,7 @@
-title: Just the Docs Template
-description: A starter template for a Jeykll site using the Just the Docs theme!
+title: Vulner's Blog
+description: My personal blog where I share my knowledge in cybersecurity!
 theme: just-the-docs
 
-url: https://just-the-docs.github.io
+url: https://vu1n3r.github.io/vu1n3r.github.io
 
-aux_links:
-  Template Repository: https://github.com/just-the-docs/just-the-docs-template
+color_scheme: dark  
