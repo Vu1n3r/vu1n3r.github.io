@@ -45,9 +45,11 @@ const { Content, headings } = await render(post);
   title={title}
   description={`${difficulty} · ${author}`}
   locale={locale}
+  wide
 >
-  <article class="post">
-    <header class="head">
+  <div class="layout">
+    <article class="post">
+      <header class="head">
       <p class="eyebrow">
         <a href={localizePath('/blog/', locale)}>{t('blog.title')}</a>
       </p>
@@ -83,25 +85,23 @@ const { Content, headings } = await render(post);
       </ul>
     </header>
 
-    <div class="body">
-      {/*
-        Article first in source order: it is the primary content, and on a
-        narrow screen the reader should reach it without scrolling past a
-        contents list. CSS `order` hoists the TOC above it on mobile and
-        parks it in the side column on desktop.
-
-        lang/dir here, not on <html>: the writeup renders in the language it
-        was written in, inside chrome that stays in the reader's language.
-      */}
-      <div class="prose" lang={content.htmlLang} dir={content.dir}>
-        <Content />
-      </div>
-
-      <aside class="side">
-        <TableOfContents headings={headings} locale={locale} contentLang={lang} />
-      </aside>
+    {/*
+      lang/dir here, not on <html>: the writeup renders in the language it
+      was written in, inside chrome that stays in the reader's language.
+    */}
+    <div class="prose" lang={content.htmlLang} dir={content.dir}>
+      <Content />
     </div>
   </article>
+
+  {/*
+    The contents list is a sibling of the article, not a column inside it.
+    It sits in the page's outer track, so the article's width is identical
+    whether or not it is showing.
+  */}
+  <aside class="side">
+    <TableOfContents headings={headings} locale={locale} contentLang={lang} />
+  </aside>
 
   {
     (newer || older) && (
@@ -137,9 +137,16 @@ const { Content, headings } = await render(post);
       </nav>
     )
   }
+  </div>
 </BaseLayout>
 
 <style>
+  /* Wider than the site's default measure: writeups are screenshot-heavy
+     and terminal output is long, and 68ch renders both too small. */
+  .layout {
+    --post-measure: 44rem;
+  }
+
   .eyebrow {
     margin: 0 0 0.4rem;
     font-size: 0.8rem;
@@ -207,32 +214,51 @@ const { Content, headings } = await render(post);
     list-style: none;
   }
 
-  .body {
+  /* The article's track is a fixed reading measure and never changes width.
+     The contents list gets its own outer track, so turning it on or off
+     leaves the prose identical — that is the whole point of moving it out
+     of a shared wrapper. */
+  .layout {
     display: grid;
-    gap: 2rem;
+    grid-template-columns: minmax(0, var(--post-measure));
+    justify-content: center;
+    column-gap: 3.5rem;
+  }
+
+  .post,
+  .pager {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .prose {
+    max-width: 100%;
     padding-top: 2rem;
   }
 
-  /* Only below the side-column breakpoint does the contents list sit in the
-     flow, and then it goes above the article — a reader on a phone should
-     see where they are before they start scrolling. */
+  /* Hidden until there is genuinely room beside a full-width article. Below
+     this the reader gets the article directly under its title, with nothing
+     wedged between them. */
   .side {
-    order: -1;
+    display: none;
   }
 
-  /* 48rem, not 60rem: at 960px the sidebar was only appearing on wide
-     desktop windows, so most laptops got the stacked layout and the article
-     started a screenful below the title. The contents column flexes with the
-     viewport so it can move aside sooner without squeezing the prose. */
-  @media (min-width: 48rem) {
-    .body {
-      grid-template-columns: minmax(0, 1fr) clamp(10rem, 18vw, 15rem);
-      gap: clamp(1.5rem, 4vw, 3rem);
-      align-items: start;
+  /* 72rem = article (44rem) + gap (3.5rem) + contents (15rem) + page gutter.
+     The sidebar only appears once all of that fits without borrowing from
+     the article. */
+  @media (min-width: 72rem) {
+    .layout {
+      grid-template-columns: minmax(0, var(--post-measure)) minmax(12rem, 15rem);
     }
 
     .side {
-      order: 0;
+      display: block;
+      grid-column: 2;
+      grid-row: 1;
+      /* Stretch to the article's height so the sticky child inside has room
+         to travel; without this the aside is only as tall as the list and
+         sticky has nothing to stick within. */
+      align-self: stretch;
     }
   }
 

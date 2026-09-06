@@ -79,9 +79,9 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     color: var(--link);
   }
 
-  /* Matches the side-column breakpoint on the post page: once the contents
-     list is beside the article, keep it in view while the reader scrolls. */
-  @media (min-width: 48rem) {
+  /* Must match the post page's side-column breakpoint (72rem): the list only
+     goes sticky once it is actually in the outer column. */
+  @media (min-width: 72rem) {
     .toc {
       position: sticky;
       top: 5rem;

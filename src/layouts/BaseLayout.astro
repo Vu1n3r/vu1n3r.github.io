@@ -13,6 +13,12 @@ interface Props {
   /** Constrain the main column to a comfortable reading measure. */
   narrow?: boolean;
   /**
+   * Widen the main column beyond the site container. For pages that park a
+   * secondary column (a contents list) outside the reading measure, so the
+   * prose keeps its full width instead of paying for the sidebar.
+   */
+  wide?: boolean;
+  /**
    * UI locale: nav, footer and the page's own direction. A post written in
    * another language sets direction on its own <article>, not here — the
    * chrome stays in the language the reader chose.
@@ -24,6 +30,7 @@ const {
   title,
   description,
   narrow = false,
+  wide = false,
   locale = defaultLocale,
 } = Astro.props;
 
@@ -87,7 +94,7 @@ const alternates = (Object.keys(locales) as Locale[]).map((code) => ({
   <body>
     <a class="skip-link" href="#main">{t('a11y.skip')}</a>
     <Header locale={locale} />
-    <main id="main" class:list={['wrap', 'main', { narrow }]}>
+    <main id="main" class:list={['wrap', 'main', { narrow, wide }]}>
       <slot />
     </main>
     <Footer locale={locale} />
@@ -102,5 +109,9 @@ const alternates = (Object.keys(locales) as Locale[]).map((code) => ({
 
   .main.narrow {
     max-width: calc(var(--measure) + 2.5rem);
+  }
+
+  .main.wide {
+    max-width: 76rem;
   }
 </style>
