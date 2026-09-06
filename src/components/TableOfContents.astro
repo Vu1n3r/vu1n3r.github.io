@@ -1,19 +1,13 @@
 ---
 import type { MarkdownHeading } from 'astro';
-import { defaultLocale, locales, type Locale } from '../config';
 import { useTranslations } from '../i18n/ui';
 
 interface Props {
   headings: MarkdownHeading[];
-  /** UI locale, for the heading label. */
-  locale?: Locale;
-  /** Language of the post — heading text comes from the article, not the UI. */
-  contentLang?: Locale;
 }
 
-const { headings, locale = defaultLocale, contentLang = locale } = Astro.props;
-const t = useTranslations(locale);
-const content = locales[contentLang];
+const { headings } = Astro.props;
+const t = useTranslations();
 
 /**
  * Astro generates a slug for every markdown heading, so the ids the TOC links
@@ -27,7 +21,7 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
   toc.length > 1 && (
     <nav class="toc" aria-labelledby="toc-heading">
       <h2 id="toc-heading">{t('post.contents')}</h2>
-      <ol lang={content.htmlLang} dir={content.dir}>
+      <ol>
         {toc.map((h) => (
           <li data-depth={h.depth}>
             <a href={`#${h.slug}`}>{h.text}</a>

@@ -1,8 +1,8 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { site, locales, defaultLocale, type Locale } from '../config';
-import { useTranslations, localizePath, stripLocale } from '../i18n/ui';
+import { site, locales, siteLocale, type Locale } from '../config';
+import { useTranslations } from '../i18n/ui';
 import '../styles/global.css';
 
 interface Props {
@@ -19,11 +19,11 @@ interface Props {
    */
   wide?: boolean;
   /**
-   * UI locale: nav, footer and the page's own direction. A post written in
-   * another language sets direction on its own <article>, not here — the
-   * chrome stays in the language the reader chose.
+   * Language of this page's main content. The site chrome is always Arabic,
+   * but an English writeup sets this to 'en' so the whole page renders
+   * left-to-right. Defaults to the site language.
    */
-  locale?: Locale;
+  contentLang?: Locale;
 }
 
 const {
@@ -31,60 +31,45 @@ const {
   description,
   narrow = false,
   wide = false,
-  locale = defaultLocale,
+  contentLang = siteLocale,
 } = Astro.props;
 
-const t = useTranslations(locale);
-const active = locales[locale];
+const t = useTranslations();
+
+// The page's language stays the site's — the nav and footer are Arabic on
+// every page. Only `dir` follows the content, so an English writeup lays the
+// page out left-to-right without misdescribing the chrome around it.
+const chrome = locales[siteLocale];
+const dir = locales[contentLang].dir;
 
 const pageTitle = title
-  ? `${title} — ${site.name[locale]}`
-  : `${site.name[locale]} — ${site.university[locale]}`;
+  ? `${title} — ${site.name[siteLocale]}`
+  : `${site.name[siteLocale]} — ${site.university[siteLocale]}`;
 
-const metaDescription = description ?? site.description[locale];
+const metaDescription = description ?? site.description[siteLocale];
 
-const basePath = stripLocale(Astro.url.pathname);
-
-const url = (path: string) =>
-  Astro.site ? new URL(path, Astro.site).href : path;
-
-const canonical = url(localizePath(basePath, locale));
-
-// One alternate per locale plus x-default, so a search engine serves the
-// right language and does not treat the two as duplicates of each other.
-const alternates = (Object.keys(locales) as Locale[]).map((code) => ({
-  hreflang: locales[code].htmlLang,
-  href: url(localizePath(basePath, code)),
-}));
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : Astro.url.pathname;
 ---
 
-<html lang={active.htmlLang} dir={active.dir}>
+<html lang={chrome.htmlLang} dir={dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
 
-    {
-      alternates.map((alt) => (
-        <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
-      ))
-    }
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={url(localizePath(basePath, defaultLocale))}
-    />
 
     <title>{pageTitle}</title>
     <meta name="description" content={metaDescription} />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={site.name[locale]} />
+    <meta property="og:site_name" content={site.name[siteLocale]} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content={active.htmlLang} />
+    <meta property="og:locale" content={chrome.htmlLang} />
     <meta name="twitter:card" content="summary" />
 
     <meta name="generator" content={Astro.generator} />
@@ -93,11 +78,11 @@ const alternates = (Object.keys(locales) as Locale[]).map((code) => ({
 
   <body>
     <a class="skip-link" href="#main">{t('a11y.skip')}</a>
-    <Header locale={locale} />
+    <Header />
     <main id="main" class:list={['wrap', 'main', { narrow, wide }]}>
       <slot />
     </main>
-    <Footer locale={locale} />
+    <Footer />
   </body>
 </html>
 

@@ -1,41 +1,37 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import FormattedDate from '../../../components/FormattedDate.astro';
-import TableOfContents from '../../../components/TableOfContents.astro';
-import { localePaths } from '../../../i18n/routes';
-import { useTranslations, localizePath } from '../../../i18n/ui';
-import { getPosts, tagHref, postHref } from '../../../lib/posts';
-import { locales } from '../../../config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import { useTranslations } from '../../i18n/ui';
+import { getPosts, tagHref, postHref } from '../../lib/posts';
+import { locales, siteLocale } from '../../config';
 
 /**
- * Every published post in every UI locale. The chrome follows the reader's
- * locale; the article keeps the language it was written in. `posts` is
- * newest-first, so the entry before a post is NEWER and the one after older.
+ * One page per published post. `posts` is newest-first, so the entry before
+ * a post in the array is the NEWER one and the entry after is older.
  */
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getPosts();
 
-  return localePaths().flatMap((entry) =>
-    posts.map((post, i) => ({
-      params: { ...entry.params, slug: post.id },
-      props: {
-        ...entry.props,
-        post,
-        newer: posts[i - 1] ?? null,
-        older: posts[i + 1] ?? null,
-      },
-    })),
-  );
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      newer: posts[i - 1] ?? null,
+      older: posts[i + 1] ?? null,
+    },
+  }));
 };
 
-const { locale, post, newer, older } = Astro.props;
+const { post, newer, older } = Astro.props;
 const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
 
-const t = useTranslations(locale);
+const t = useTranslations();
 
-// The article's own language, which may differ from the reader's UI locale.
+// The language this writeup was written in. It sets the direction of the
+// whole page — an English writeup lays out left-to-right, nav included.
 const content = locales[lang];
 
 const { Content, headings } = await render(post);
@@ -44,20 +40,20 @@ const { Content, headings } = await render(post);
 <BaseLayout
   title={title}
   description={`${difficulty} · ${author}`}
-  locale={locale}
+  contentLang={lang}
   wide
 >
   <div class="layout">
     <article class="post">
       <header class="head">
       <p class="eyebrow">
-        <a href={localizePath('/blog/', locale)}>{t('blog.title')}</a>
+        <a href="/blog/">{t('blog.title')}</a>
       </p>
 
-      <h1 lang={content.htmlLang} dir={content.dir}>{title}</h1>
+      <h1 lang={content.htmlLang}>{title}</h1>
 
       <div class="meta">
-        <FormattedDate date={date} locale={locale} />
+        <FormattedDate date={date} />
         <span class="sep" aria-hidden="true">·</span>
         <span class="author">{author}</span>
         {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
@@ -65,7 +61,7 @@ const { Content, headings } = await render(post);
       </div>
 
       {
-        lang !== locale && (
+        lang !== siteLocale && (
           <p class="lang-notice" lang={content.htmlLang}>
             {t('post.translatedNotice')}
           </p>
@@ -77,7 +73,7 @@ const { Content, headings } = await render(post);
       <ul class="tags">
         {tags.map((tag) => (
           <li>
-            <a class="tag" href={tagHref(tag, locale)}>
+            <a class="tag" href={tagHref(tag)}>
               {tag}
             </a>
           </li>
@@ -85,11 +81,8 @@ const { Content, headings } = await render(post);
       </ul>
     </header>
 
-    {/*
-      lang/dir here, not on <html>: the writeup renders in the language it
-      was written in, inside chrome that stays in the reader's language.
-    */}
-    <div class="prose" lang={content.htmlLang} dir={content.dir}>
+    {/* Direction is already on <html>; this only names the language. */}
+    <div class="prose" lang={content.htmlLang}>
       <Content />
     </div>
   </article>
@@ -100,7 +93,7 @@ const { Content, headings } = await render(post);
     whether or not it is showing.
   */}
   <aside class="side">
-    <TableOfContents headings={headings} locale={locale} contentLang={lang} />
+    <TableOfContents headings={headings} />
   </aside>
 
   {
@@ -108,7 +101,7 @@ const { Content, headings } = await render(post);
       <nav class="pager" aria-label={t('post.moreWriteups')}>
         <div class="prev">
           {older && (
-            <a href={postHref(older.id, locale)}>
+            <a href={postHref(older.id)}>
               <span class="dir">← {t('post.older')}</span>
               <span
                 class="t"
@@ -122,7 +115,7 @@ const { Content, headings } = await render(post);
         </div>
         <div class="next">
           {newer && (
-            <a href={postHref(newer.id, locale)}>
+            <a href={postHref(newer.id)}>
               <span class="dir">{t('post.newer')} →</span>
               <span
                 class="t"

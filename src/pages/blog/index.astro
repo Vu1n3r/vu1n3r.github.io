@@ -1,25 +1,19 @@
 ---
-import type { GetStaticPaths } from 'astro';
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import PostCard from '../../../components/PostCard.astro';
-import { localePaths } from '../../../i18n/routes';
-import { useTranslations, localizePath } from '../../../i18n/ui';
-import { getPosts, getTags, tagHref } from '../../../lib/posts';
-import { repo } from '../../../config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { useTranslations } from '../../i18n/ui';
+import { getPosts, getTags, tagHref } from '../../lib/posts';
+import { repo } from '../../config';
 
-export const getStaticPaths: GetStaticPaths = () => localePaths();
+const t = useTranslations();
 
-const { locale } = Astro.props;
-const t = useTranslations(locale);
-
-// Both locales list every writeup. The club is small and bilingual; hiding
-// an Arabic writeup from an English reader would hide half the archive.
-// Each card marks its own language so the choice is visible before clicking.
+// Every writeup is listed regardless of the language it was written in.
+// Cards mark a non-Arabic writeup so the reader knows before clicking.
 const posts = await getPosts();
 const tags = await getTags();
 ---
 
-<BaseLayout title={t('blog.title')} locale={locale}>
+<BaseLayout title={t('blog.title')}>
   <header class="page-head">
     <h1>{t('blog.title')}</h1>
     <p>
@@ -32,11 +26,11 @@ const tags = await getTags();
     tags.length > 0 && (
       <nav class="tag-bar" aria-label={t('tags.title')}>
         {tags.map((tag) => (
-          <a class="tag" href={tagHref(tag.label, locale)}>
+          <a class="tag" href={tagHref(tag.label)}>
             {tag.label} <span class="count">{tag.count}</span>
           </a>
         ))}
-        <a class="tag all" href={localizePath('/blog/tags/', locale)}>
+        <a class="tag all" href="/blog/tags/">
           {t('blog.allTags')} →
         </a>
       </nav>
@@ -47,7 +41,7 @@ const tags = await getTags();
     posts.length > 0 ? (
       <div class="list">
         {posts.map((post) => (
-          <PostCard post={post} locale={locale} />
+          <PostCard post={post} />
         ))}
       </div>
     ) : (

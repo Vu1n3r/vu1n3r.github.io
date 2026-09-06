@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+---
+
+{/*
+  Placeholder. Home is still ahead of us in the build order — replace this
+  whole body when it is built for real.
+*/}
+<BaseLayout>
+  <p class="placeholder">{t('home.placeholder')}</p>
+  <p><a href="/blog/">{t('home.toBlog')} →</a></p>
+</BaseLayout>
+
+<style>
+  .placeholder {
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+</style>

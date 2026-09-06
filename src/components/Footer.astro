@@ -1,13 +1,8 @@
 ---
-import { site, socials, teams, type Locale } from '../config';
+import { site, socials, teams, siteLocale } from '../config';
 import { useTranslations } from '../i18n/ui';
 
-interface Props {
-  locale: Locale;
-}
-
-const { locale } = Astro.props;
-const t = useTranslations(locale);
+const t = useTranslations();
 
 const year = new Date().getFullYear();
 const years = year > site.founded ? `${site.founded}–${year}` : `${site.founded}`;
@@ -19,8 +14,8 @@ const comps = Object.values(teams).filter((t) => t.url !== null);
 <footer class="site-footer">
   <div class="wrap cols">
     <div>
-      <p class="name">{site.name[locale]}</p>
-      <p class="muted">{site.tagline[locale]}</p>
+      <p class="name">{site.name[siteLocale]}</p>
+      <p class="muted">{site.tagline[siteLocale]}</p>
     </div>
 
     {
@@ -67,7 +62,7 @@ const comps = Object.values(teams).filter((t) => t.url !== null);
 
   <div class="wrap bottom">
     <p class="muted">
-      © {years} {site.name[locale]}, {site.university[locale]}.
+      © {years} {site.name[siteLocale]}, {site.university[siteLocale]}.
     </p>
     <p class="muted">{t('footer.credit')}</p>
   </div>

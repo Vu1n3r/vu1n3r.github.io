@@ -1,12 +1,13 @@
-import { defaultLocale, locales, type Locale } from '../config';
+import { siteLocale, type Locale } from '../config';
 
 /**
  * UI strings, one dictionary per locale.
  *
- * Arabic is the reference, because it is the default locale — a missing key
- * falls back to it rather than rendering an empty string or a raw key, so a
- * half-translated locale still ships a usable page. `_Complete` below makes
- * a key missing from ANY locale a type error, so the fallback stays a safety
+ * The site renders Arabic; the English dictionary is kept because writeups
+ * are published in both languages and a switcher is a plausible next step.
+ * Arabic is the reference — a missing key falls back to it rather than
+ * rendering an empty string or a raw key. `_Complete` below makes a key
+ * missing from ANY dictionary a type error, so the fallback stays a safety
  * net rather than something the site quietly relies on.
  */
 export const ui = {
@@ -18,11 +19,6 @@ export const ui = {
 
     'a11y.skip': 'تخطَّ إلى المحتوى',
     'a11y.primaryNav': 'التنقل الرئيسي',
-    'a11y.langNav': 'اللغة',
-
-    'lang.switchTo': 'اقرأ هذه الصفحة بالإنجليزية',
-    'lang.switchToShort': 'English',
-
     'home.placeholder':
       'لم تُبنَ هذه الصفحة بعد. الشروحات هي الأهم — ابدأ من هناك.',
     'home.toBlog': 'اقرأ الشروحات',
@@ -67,11 +63,6 @@ export const ui = {
 
     'a11y.skip': 'Skip to content',
     'a11y.primaryNav': 'Primary',
-    'a11y.langNav': 'Language',
-
-    'lang.switchTo': 'Read this page in Arabic',
-    'lang.switchToShort': 'العربية',
-
     'home.placeholder':
       'This page has not been built yet. The writeups are the part that matters — start there.',
     'home.toBlog': 'Read the writeups',
@@ -127,10 +118,10 @@ void _completeness;
  *   const t = useTranslations(locale);
  *   t('blog.title')
  */
-export function useTranslations(locale: Locale) {
+export function useTranslations(locale: Locale = siteLocale) {
   return function t(key: UIKey): string {
     const dict = ui[locale] as Partial<Record<UIKey, string>>;
-    return dict[key] ?? ui[defaultLocale][key];
+    return dict[key] ?? ui[siteLocale][key];
   };
 }
 
@@ -142,31 +133,4 @@ export function plural(
   other: UIKey,
 ): string {
   return count === 1 ? t(one) : t(other);
-}
-
-/**
- * Prefix a root-relative path with the locale segment.
- * '/blog/' + 'ar' -> '/ar/blog/';  '/blog/' + 'en' -> '/blog/'
- */
-export function localizePath(path: string, locale: Locale): string {
-  const clean = path.startsWith('/') ? path : `/${path}`;
-  return locale === defaultLocale ? clean : `/${locale}${clean}`;
-}
-
-/**
- * Strip any locale prefix from a path, giving the default-locale form.
- * Used by the language switcher to stay on the current page when swapping.
- */
-export function stripLocale(path: string): string {
-  for (const code of Object.keys(locales) as Locale[]) {
-    if (code === defaultLocale) continue;
-    if (path === `/${code}` || path === `/${code}/`) return '/';
-    if (path.startsWith(`/${code}/`)) return path.slice(code.length + 1);
-  }
-  return path;
-}
-
-/** The other locale(s), for building a switcher. */
-export function otherLocales(current: Locale): Locale[] {
-  return (Object.keys(locales) as Locale[]).filter((l) => l !== current);
 }

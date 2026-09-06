@@ -1,0 +1,86 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { useTranslations, plural } from '../../../i18n/ui';
+import { getPosts, getTags, tagSlug } from '../../../lib/posts';
+
+/**
+ * One page per tag. Static output has no server to resolve an unknown tag at
+ * request time, so every tag page must be enumerated here.
+ */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const [tags, posts] = await Promise.all([getTags(), getPosts()]);
+
+  return tags.map((tag) => ({
+    params: { tag: tag.slug },
+    props: {
+      label: tag.label,
+      posts: posts.filter((p) =>
+        p.data.tags.some((x) => tagSlug(x) === tag.slug),
+      ),
+    },
+  }));
+};
+
+const { label, posts } = Astro.props;
+const t = useTranslations();
+---
+
+<BaseLayout title={`${t('tags.title')}: ${label}`}>
+  <header class="page-head">
+    <p class="eyebrow">
+      <a href="/blog/tags/">{t('tags.title')}</a>
+    </p>
+    <h1>{label}</h1>
+    <p class="count">
+      {posts.length}{' '}
+      {plural(t, posts.length, 'post.writeupCount_one', 'post.writeupCount_other')}
+    </p>
+  </header>
+
+  <div class="list">
+    {posts.map((post) => <PostCard post={post} />)}
+  </div>
+
+  <p class="back">
+    <a href="/blog/">← {t('tags.back')}</a>
+  </p>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: 1rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.35rem;
+    font-size: 0.8rem;
+  }
+
+  .eyebrow a {
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+
+  .eyebrow a:hover {
+    color: var(--link);
+  }
+
+  .page-head h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-family: var(--font-mono);
+    unicode-bidi: isolate;
+  }
+
+  .count {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .back {
+    margin-top: 2.5rem;
+  }
+</style>

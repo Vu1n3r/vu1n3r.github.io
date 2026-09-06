@@ -39,11 +39,11 @@ export const site = {
 /**
  * Languages a writeup may be written in.
  *
- * `dir` drives the `dir` attribute on <html>, so adding a language here is
- * all that is needed for it to render in the correct direction — nothing
- * else in the codebase branches on a language code.
+ * `dir` drives the `dir` attribute on <html>: an English writeup renders its
+ * whole page left-to-right. Nothing else in the codebase branches on a
+ * language code.
  *
- * `htmlLang` is what goes in the lang attribute; keep it a valid BCP 47 tag.
+ * `htmlLang` is what goes in a lang attribute; keep it a valid BCP 47 tag.
  */
 export const locales = {
   ar: { label: 'Arabic', nativeLabel: 'العربية', htmlLang: 'ar', dir: 'rtl' },
@@ -53,18 +53,20 @@ export const locales = {
 export type Locale = keyof typeof locales;
 
 /**
- * The club's primary language. Served unprefixed at the site root; every
- * other locale gets a path prefix. Also the fallback for a post that does
- * not declare a language.
+ * The site's language. All chrome — nav, footer, page headings — renders in
+ * this one language; there is no language switcher.
+ *
+ * A writeup may still be written in another language: its `lang` frontmatter
+ * sets the direction of the page it appears on. See `locales` above.
  */
-export const defaultLocale: Locale = 'ar';
+export const siteLocale: Locale = 'ar';
 
 /**
  * Primary navigation. Order here is the order rendered.
  *
- * `key` is a translation key from src/i18n/ui.ts, not a label — the nav must
- * render in whichever locale the reader chose. `href` is the unprefixed
- * path; the locale prefix is added at render time.
+ * `key` is a string key from src/i18n/ui.ts rather than a literal label, so
+ * the wording of the whole nav lives in one file with the rest of the UI
+ * text instead of being split between here and there.
  */
 export const nav = [
   { key: 'nav.home', href: '/' },

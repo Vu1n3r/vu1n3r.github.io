@@ -1,19 +1,14 @@
 ---
-import type { GetStaticPaths } from 'astro';
-import BaseLayout from '../../../../layouts/BaseLayout.astro';
-import { localePaths } from '../../../../i18n/routes';
-import { useTranslations, localizePath, plural } from '../../../../i18n/ui';
-import { getTags, tagHref } from '../../../../lib/posts';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { useTranslations, plural } from '../../../i18n/ui';
+import { getTags, tagHref } from '../../../lib/posts';
 
-export const getStaticPaths: GetStaticPaths = () => localePaths();
-
-const { locale } = Astro.props;
-const t = useTranslations(locale);
+const t = useTranslations();
 
 const tags = await getTags();
 ---
 
-<BaseLayout title={t('tags.title')} locale={locale}>
+<BaseLayout title={t('tags.title')}>
   <header class="page-head">
     <h1>{t('tags.title')}</h1>
     <p>{tags.length} {t('tags.inUse')}. {t('tags.intro')}</p>
@@ -24,7 +19,7 @@ const tags = await getTags();
       <ul class="grid">
         {tags.map((tag) => (
           <li>
-            <a href={tagHref(tag.label, locale)}>
+            <a href={tagHref(tag.label)}>
               <span class="label">{tag.label}</span>
               <span class="count">
                 {tag.count} {plural(t, tag.count, 'tags.count_one', 'tags.count_other')}
@@ -39,7 +34,7 @@ const tags = await getTags();
   }
 
   <p class="back">
-    <a href={localizePath('/blog/', locale)}>← {t('tags.back')}</a>
+    <a href="/blog/">← {t('tags.back')}</a>
   </p>
 </BaseLayout>
 

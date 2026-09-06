@@ -1,13 +1,11 @@
 ---
-import { locales, defaultLocale, type Locale } from '../config';
+import { locales, siteLocale } from '../config';
 
 interface Props {
   date: Date;
-  /** UI locale the date is displayed in. */
-  locale?: Locale;
 }
 
-const { date, locale = defaultLocale } = Astro.props;
+const { date } = Astro.props;
 
 /**
  * Fixed timezone: the build machine's zone must not shift a post dated the
@@ -15,7 +13,7 @@ const { date, locale = defaultLocale } = Astro.props;
  * ports, CVEs and byte counts in Latin digits, and switching numeral systems
  * for the date alone reads as an inconsistency rather than a translation.
  */
-const tag = locale === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB';
+const tag = siteLocale === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB';
 
 const display = date.toLocaleDateString(tag, {
   day: 'numeric',
@@ -25,4 +23,4 @@ const display = date.toLocaleDateString(tag, {
 });
 ---
 
-<time datetime={date.toISOString()} lang={locales[locale].htmlLang}>{display}</time>
+<time datetime={date.toISOString()} lang={locales[siteLocale].htmlLang}>{display}</time>

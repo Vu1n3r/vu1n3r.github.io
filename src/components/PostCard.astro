@@ -1,31 +1,29 @@
 ---
 import FormattedDate from './FormattedDate.astro';
 import { tagHref, postHref, type Post } from '../lib/posts';
-import { locales, defaultLocale, type Locale } from '../config';
+import { locales, siteLocale } from '../config';
 
 interface Props {
   post: Post;
-  /** UI locale of the listing this card appears in. */
-  locale?: Locale;
 }
 
-const { post, locale = defaultLocale } = Astro.props;
+const { post } = Astro.props;
 const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
 
-// The card follows the reader's UI locale. Only the title carries the post's
-// own language, so an Arabic heading renders right-to-left inside an English
-// listing without dragging the metadata row with it.
+// The listing runs in the site's direction. Only the title carries the post's
+// own language, so an English heading renders left-to-right inside the
+// right-to-left list without dragging the metadata row with it.
 const postLocale = locales[lang];
 ---
 
 <article class="card">
   <div class="meta">
-    <FormattedDate date={date} locale={locale} />
+    <FormattedDate date={date} />
     <span class="sep" aria-hidden="true">·</span>
     <span class="author">{author}</span>
     {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
     {
-      lang !== locale && (
+      lang !== siteLocale && (
         <span class="lang-badge" lang={postLocale.htmlLang}>
           {postLocale.nativeLabel}
         </span>
@@ -36,14 +34,14 @@ const postLocale = locales[lang];
   </div>
 
   <h2 lang={postLocale.htmlLang} dir={postLocale.dir}>
-    <a href={postHref(post.id, locale)}>{title}</a>
+    <a href={postHref(post.id)}>{title}</a>
   </h2>
 
   <ul class="tags">
     {
       tags.map((tag) => (
         <li>
-          <a class="tag" href={tagHref(tag, locale)}>
+          <a class="tag" href={tagHref(tag)}>
             {tag}
           </a>
         </li>
