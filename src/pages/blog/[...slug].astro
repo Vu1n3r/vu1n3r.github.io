@@ -1,0 +1,231 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import { getPosts, tagHref } from '../../lib/posts';
+
+/**
+ * One page per published post. `posts` is already newest-first, so the entry
+ * before a post in the array is the NEWER one and the entry after is older.
+ */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getPosts();
+
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      newer: posts[i - 1] ?? null,
+      older: posts[i + 1] ?? null,
+    },
+  }));
+};
+
+const { post, newer, older } = Astro.props;
+const { title, date, author, tags, ctf, difficulty, draft } = post.data;
+
+// render() returns the compiled component plus the heading tree Astro built
+// while parsing the markdown. Both come from the same pass — the TOC can
+// never drift out of sync with the article.
+const { Content, headings } = await render(post);
+---
+
+<BaseLayout title={title} description={`${difficulty} · by ${author}`}>
+  <article class="post">
+    <header class="head">
+      <p class="eyebrow"><a href="/blog/">Writeups</a></p>
+      <h1>{title}</h1>
+
+      <div class="meta">
+        <FormattedDate date={date} />
+        <span class="sep" aria-hidden="true">·</span>
+        <span class="author">{author}</span>
+        {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
+        <span class="difficulty" data-level={difficulty}>{difficulty}</span>
+      </div>
+
+      {
+        draft && (
+          <p class="draft-notice">
+            This post is a draft. It is visible in local development only and
+            will not appear in a production build.
+          </p>
+        )
+      }
+
+      <ul class="tags">
+        {tags.map((tag) => (
+          <li>
+            <a class="tag" href={tagHref(tag)}>
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </header>
+
+    <div class="body">
+      <aside class="side">
+        <TableOfContents headings={headings} />
+      </aside>
+
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  {
+    (newer || older) && (
+      <nav class="pager" aria-label="More writeups">
+        <div class="prev">
+          {older && (
+            <a href={`/blog/${older.id}/`}>
+              <span class="dir">← Older</span>
+              <span class="t">{older.data.title}</span>
+            </a>
+          )}
+        </div>
+        <div class="next">
+          {newer && (
+            <a href={`/blog/${newer.id}/`}>
+              <span class="dir">Newer →</span>
+              <span class="t">{newer.data.title}</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .eyebrow a {
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+
+  .eyebrow a:hover {
+    color: var(--link);
+  }
+
+  .head {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .head h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    max-width: 24ch;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+  }
+
+  .author {
+    color: var(--text-muted);
+  }
+
+  .sep {
+    color: var(--border);
+  }
+
+  .draft-notice {
+    margin: 1rem 0 0;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--medium);
+    border-radius: var(--radius);
+    color: var(--medium);
+    font-size: 0.85rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .body {
+    display: grid;
+    gap: 2.5rem;
+    padding-top: 2rem;
+  }
+
+  .side {
+    order: -1;
+  }
+
+  @media (min-width: 60rem) {
+    .body {
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      gap: 3rem;
+    }
+
+    .side {
+      order: 0;
+    }
+  }
+
+  .pager {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  @media (min-width: 40rem) {
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .pager a {
+    display: grid;
+    gap: 0.2rem;
+    height: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    text-decoration: none;
+  }
+
+  .pager a:hover {
+    border-color: var(--accent);
+  }
+
+  .next a {
+    text-align: right;
+  }
+
+  .dir {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .t {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+</style>

@@ -164,3 +164,124 @@ a.tag:hover {
 .difficulty[data-level='hard'] {
   color: var(--hard);
 }
+
+/* --- rendered markdown ---------------------------------------------------
+   Scoped styles in an .astro file don't reach markdown output, so post body
+   styling lives here. Writeups are screenshot- and code-heavy; everything
+   below is about keeping long output readable and never breaking the page
+   layout horizontally. */
+
+.prose {
+  max-width: var(--measure);
+}
+
+.prose > *:first-child {
+  margin-top: 0;
+}
+
+.prose h2 {
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 0.5rem;
+  font-size: 1.4rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.prose h3 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.12rem;
+}
+
+.prose h4 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.prose p,
+.prose li {
+  overflow-wrap: break-word;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.3rem;
+}
+
+.prose li + li {
+  margin-top: 0.3rem;
+}
+
+.prose img {
+  display: block;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.prose blockquote {
+  margin: 1.5rem 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* Inline code — distinct from a code block, never mistaken for one. */
+.prose :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
+/* Shiki output. Highlighting is baked in at build time; this is only the
+   frame around it. */
+.prose pre {
+  margin: 1.25rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  line-height: 1.55;
+  tab-size: 4;
+}
+
+.prose pre code {
+  display: block;
+  min-width: 0;
+}
+
+/* Wide tables and code must scroll inside themselves, not push the page. */
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.prose th,
+.prose td {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border-soft);
+  text-align: left;
+}
+
+.prose th {
+  background: var(--bg-raised);
+  font-weight: 600;
+}
+
+.prose hr {
+  margin: 2rem 0;
+}
+
+/* Task lists in the submission checklist render as bare list items. */
+.prose input[type='checkbox'] {
+  margin-right: 0.4rem;
+  accent-color: var(--accent);
+}
+
+/* Anchor target offset for TOC jumps is handled by scroll-padding-top on
+   html, so headings don't need individual offsets. */

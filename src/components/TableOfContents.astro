@@ -1,0 +1,83 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+/**
+ * Astro generates a slug for every markdown heading, so the ids the TOC links
+ * to already exist in the rendered content — nothing needs to run in the
+ * browser. h1 is the post title and h4+ is too granular, so only h2/h3.
+ */
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  toc.length > 1 && (
+    <nav class="toc" aria-labelledby="toc-heading">
+      <h2 id="toc-heading">On this page</h2>
+      <ol>
+        {toc.map((h) => (
+          <li data-depth={h.depth}>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  .toc {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    padding: 1rem 1.1rem;
+    font-size: 0.875rem;
+  }
+
+  .toc h2 {
+    margin: 0 0 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  li[data-depth='3'] {
+    padding-left: 0.9rem;
+  }
+
+  a {
+    color: var(--text-muted);
+    text-decoration: none;
+    line-height: 1.4;
+    display: inline-block;
+  }
+
+  a:hover {
+    color: var(--link);
+  }
+
+  /* Wide screens: park the TOC beside the article and keep it in view. */
+  @media (min-width: 60rem) {
+    .toc {
+      position: sticky;
+      top: 5rem;
+      max-height: calc(100vh - 7rem);
+      overflow-y: auto;
+    }
+  }
+</style>
