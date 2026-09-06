@@ -209,18 +209,26 @@ const { Content, headings } = await render(post);
 
   .body {
     display: grid;
-    gap: 2.5rem;
+    gap: 2rem;
     padding-top: 2rem;
   }
 
+  /* Only below the side-column breakpoint does the contents list sit in the
+     flow, and then it goes above the article — a reader on a phone should
+     see where they are before they start scrolling. */
   .side {
     order: -1;
   }
 
-  @media (min-width: 60rem) {
+  /* 48rem, not 60rem: at 960px the sidebar was only appearing on wide
+     desktop windows, so most laptops got the stacked layout and the article
+     started a screenful below the title. The contents column flexes with the
+     viewport so it can move aside sooner without squeezing the prose. */
+  @media (min-width: 48rem) {
     .body {
-      grid-template-columns: minmax(0, 1fr) 15rem;
-      gap: 3rem;
+      grid-template-columns: minmax(0, 1fr) clamp(10rem, 18vw, 15rem);
+      gap: clamp(1.5rem, 4vw, 3rem);
+      align-items: start;
     }
 
     .side {

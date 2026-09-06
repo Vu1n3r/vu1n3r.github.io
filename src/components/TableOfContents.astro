@@ -79,8 +79,9 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     color: var(--link);
   }
 
-  /* Wide screens: park the TOC beside the article and keep it in view. */
-  @media (min-width: 60rem) {
+  /* Matches the side-column breakpoint on the post page: once the contents
+     list is beside the article, keep it in view while the reader scrolls. */
+  @media (min-width: 48rem) {
     .toc {
       position: sticky;
       top: 5rem;
