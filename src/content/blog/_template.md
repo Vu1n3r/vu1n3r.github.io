@@ -22,10 +22,12 @@ ctf: 'Event Name 2026'
 # Required. One of: easy | medium | hard
 difficulty: easy
 
-# Optional, defaults to 'en'. One of: en | ar
-# 'ar' renders the whole page right-to-left. Code blocks and terminal output
-# stay left-to-right either way — do not try to fix those by hand.
-lang: en
+# Optional, defaults to 'ar'. One of: ar | en
+# Arabic is the club's primary language, so an ENGLISH writeup must set
+# lang: en explicitly. 'ar' renders the article right-to-left. Code blocks
+# and terminal output stay left-to-right either way — do not fix those by
+# hand.
+lang: ar
 
 # Optional, defaults to false. true = not published, not built, not listed.
 draft: true

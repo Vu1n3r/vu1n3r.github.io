@@ -1,5 +1,5 @@
 ---
-title: 'Pickle Rick — from a page source comment to root'
+title: 'حل تحدي imagery'
 date: 2026-02-11
 author: 'Example Member'
 tags: ['web', 'thm', 'enumeration', 'sudo']

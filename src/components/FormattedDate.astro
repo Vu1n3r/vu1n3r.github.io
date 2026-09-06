@@ -1,15 +1,23 @@
 ---
+import { locales, defaultLocale, type Locale } from '../config';
+
 interface Props {
   date: Date;
-  /** Adds a leading label, e.g. "Published". */
-  label?: string;
+  /** UI locale the date is displayed in. */
+  locale?: Locale;
 }
 
-const { date, label } = Astro.props;
+const { date, locale = defaultLocale } = Astro.props;
 
-// Fixed locale and timezone: the build machine's locale must not change how
-// dates render. UTC avoids a post dated the 1st showing as the 31st.
-const display = date.toLocaleDateString('en-GB', {
+/**
+ * Fixed timezone: the build machine's zone must not shift a post dated the
+ * 1st to the 31st. Arabic uses Latin digits (nu-latn) — writeups are full of
+ * ports, CVEs and byte counts in Latin digits, and switching numeral systems
+ * for the date alone reads as an inconsistency rather than a translation.
+ */
+const tag = locale === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB';
+
+const display = date.toLocaleDateString(tag, {
   day: 'numeric',
   month: 'short',
   year: 'numeric',
@@ -17,4 +25,4 @@ const display = date.toLocaleDateString('en-GB', {
 });
 ---
 
-<time datetime={date.toISOString()}>{label ? `${label} ` : ''}{display}</time>
+<time datetime={date.toISOString()} lang={locales[locale].htmlLang}>{display}</time>

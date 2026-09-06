@@ -5,6 +5,7 @@ author: 'Example Member'
 tags: ['crypto', 'rsa', 'number-theory']
 ctf: 'Internal Practice Set'
 difficulty: medium
+lang: en
 ---
 
 ## Summary

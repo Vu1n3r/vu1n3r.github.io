@@ -1,46 +1,61 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import TableOfContents from '../../components/TableOfContents.astro';
-import { getPosts, tagHref } from '../../lib/posts';
-import { locales } from '../../config';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import { localePaths } from '../../../i18n/routes';
+import { useTranslations, localizePath } from '../../../i18n/ui';
+import { getPosts, tagHref, postHref } from '../../../lib/posts';
+import { locales } from '../../../config';
 
 /**
- * One page per published post. `posts` is already newest-first, so the entry
- * before a post in the array is the NEWER one and the entry after is older.
+ * Every published post in every UI locale. The chrome follows the reader's
+ * locale; the article keeps the language it was written in. `posts` is
+ * newest-first, so the entry before a post is NEWER and the one after older.
  */
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getPosts();
 
-  return posts.map((post, i) => ({
-    params: { slug: post.id },
-    props: {
-      post,
-      newer: posts[i - 1] ?? null,
-      older: posts[i + 1] ?? null,
-    },
-  }));
+  return localePaths().flatMap((entry) =>
+    posts.map((post, i) => ({
+      params: { ...entry.params, slug: post.id },
+      props: {
+        ...entry.props,
+        post,
+        newer: posts[i - 1] ?? null,
+        older: posts[i + 1] ?? null,
+      },
+    })),
+  );
 };
 
-const { post, newer, older } = Astro.props;
+const { locale, post, newer, older } = Astro.props;
 const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
 
-// render() returns the compiled component plus the heading tree Astro built
-// while parsing the markdown. Both come from the same pass — the TOC can
-// never drift out of sync with the article.
+const t = useTranslations(locale);
+
+// The article's own language, which may differ from the reader's UI locale.
+const content = locales[lang];
+
 const { Content, headings } = await render(post);
 ---
 
-<BaseLayout title={title} description={`${difficulty} · by ${author}`} lang={lang}>
+<BaseLayout
+  title={title}
+  description={`${difficulty} · ${author}`}
+  locale={locale}
+>
   <article class="post">
     <header class="head">
-      <p class="eyebrow"><a href="/blog/">Writeups</a></p>
-      <h1>{title}</h1>
+      <p class="eyebrow">
+        <a href={localizePath('/blog/', locale)}>{t('blog.title')}</a>
+      </p>
+
+      <h1 lang={content.htmlLang} dir={content.dir}>{title}</h1>
 
       <div class="meta">
-        <FormattedDate date={date} />
+        <FormattedDate date={date} locale={locale} />
         <span class="sep" aria-hidden="true">·</span>
         <span class="author">{author}</span>
         {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
@@ -48,18 +63,19 @@ const { Content, headings } = await render(post);
       </div>
 
       {
-        draft && (
-          <p class="draft-notice">
-            This post is a draft. It is visible in local development only and
-            will not appear in a production build.
+        lang !== locale && (
+          <p class="lang-notice" lang={content.htmlLang}>
+            {t('post.translatedNotice')}
           </p>
         )
       }
 
+      {draft && <p class="draft-notice">{t('post.draft')}</p>}
+
       <ul class="tags">
         {tags.map((tag) => (
           <li>
-            <a class="tag" href={tagHref(tag)}>
+            <a class="tag" href={tagHref(tag, locale)}>
               {tag}
             </a>
           </li>
@@ -68,28 +84,37 @@ const { Content, headings } = await render(post);
     </header>
 
     <div class="body">
-      {/* Article first in source order: it is the primary content, and on a
-          narrow screen the reader should reach it without scrolling past a
-          contents list. CSS `order` hoists the TOC above it on mobile and
-          parks it in the right-hand column on desktop. */}
-      <div class="prose">
+      {/*
+        Article first in source order: it is the primary content, and on a
+        narrow screen the reader should reach it without scrolling past a
+        contents list. CSS `order` hoists the TOC above it on mobile and
+        parks it in the side column on desktop.
+
+        lang/dir here, not on <html>: the writeup renders in the language it
+        was written in, inside chrome that stays in the reader's language.
+      */}
+      <div class="prose" lang={content.htmlLang} dir={content.dir}>
         <Content />
       </div>
 
       <aside class="side">
-        <TableOfContents headings={headings} />
+        <TableOfContents headings={headings} locale={locale} contentLang={lang} />
       </aside>
     </div>
   </article>
 
   {
     (newer || older) && (
-      <nav class="pager" aria-label="More writeups">
+      <nav class="pager" aria-label={t('post.moreWriteups')}>
         <div class="prev">
           {older && (
-            <a href={`/blog/${older.id}/`}>
-              <span class="dir">← Older</span>
-              <span class="t" lang={older.data.lang} dir={locales[older.data.lang].dir}>
+            <a href={postHref(older.id, locale)}>
+              <span class="dir">← {t('post.older')}</span>
+              <span
+                class="t"
+                lang={locales[older.data.lang].htmlLang}
+                dir={locales[older.data.lang].dir}
+              >
                 {older.data.title}
               </span>
             </a>
@@ -97,9 +122,13 @@ const { Content, headings } = await render(post);
         </div>
         <div class="next">
           {newer && (
-            <a href={`/blog/${newer.id}/`}>
-              <span class="dir">Newer →</span>
-              <span class="t" lang={newer.data.lang} dir={locales[newer.data.lang].dir}>
+            <a href={postHref(newer.id, locale)}>
+              <span class="dir">{t('post.newer')} →</span>
+              <span
+                class="t"
+                lang={locales[newer.data.lang].htmlLang}
+                dir={locales[newer.data.lang].dir}
+              >
                 {newer.data.title}
               </span>
             </a>
@@ -151,6 +180,13 @@ const { Content, headings } = await render(post);
 
   .sep {
     color: var(--border);
+  }
+
+  .lang-notice {
+    margin: 1rem 0 0;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+    unicode-bidi: isolate;
   }
 
   .draft-notice {
@@ -236,5 +272,6 @@ const { Content, headings } = await render(post);
     font-weight: 600;
     font-size: 0.95rem;
     line-height: 1.35;
+    unicode-bidi: isolate;
   }
 </style>

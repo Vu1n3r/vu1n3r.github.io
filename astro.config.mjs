@@ -11,6 +11,17 @@ export default defineConfig({
   // the CTFd proxy will live in a Pages Function, not in Astro.
   output: 'static',
 
+  // Arabic is the club's primary language: it is served from the root
+  // (/blog/) and English from a prefix (/en/blog/). The unprefixed default
+  // is the one that gets shared and linked, so it goes to Arabic.
+  i18n: {
+    locales: ['ar', 'en'],
+    defaultLocale: 'ar',
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
+
   markdown: {
     // Shiki runs at BUILD time, so code blocks ship as plain highlighted HTML
     // with zero client-side JS. See CLAUDE.md: "Static by default".

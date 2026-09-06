@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { localePaths } from '../../i18n/routes';
+import { useTranslations, localizePath } from '../../i18n/ui';
+
+export const getStaticPaths: GetStaticPaths = () => localePaths();
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+{/*
+  Placeholder. Home is still ahead of us in the build order — this exists so
+  every route has both locales and the language switcher never lands on a
+  404. Replace the whole body when Home is built for real.
+*/}
+<BaseLayout locale={locale}>
+  <p class="placeholder">{t('home.placeholder')}</p>
+  <p>
+    <a href={localizePath('/blog/', locale)}>{t('home.toBlog')} →</a>
+  </p>
+</BaseLayout>
+
+<style>
+  .placeholder {
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+</style>

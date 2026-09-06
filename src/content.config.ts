@@ -41,10 +41,10 @@ const blog = defineCollection({
       difficulty: z.enum(['easy', 'medium', 'hard']),
 
       // Language the post is written in. Drives the lang and dir attributes
-      // on the rendered page — 'ar' renders the page right-to-left.
-      // Defaults to English so existing and English-only posts need no key.
-      // Keep this list in sync with `locales` in src/config.ts.
-      lang: z.enum(['en', 'ar']).default('en'),
+      // on the article — 'ar' renders it right-to-left. Defaults to Arabic,
+      // the club's primary language, so an English post must say so
+      // explicitly. Keep in sync with `locales` in src/config.ts.
+      lang: z.enum(['ar', 'en']).default('ar'),
 
       // Drafts stay in the repo but are filtered out of every listing and
       // are not built as pages.

@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site, locales, defaultLocale, type Locale } from '../config';
+import { useTranslations, localizePath, stripLocale } from '../i18n/ui';
 import '../styles/global.css';
 
 interface Props {
@@ -12,46 +13,71 @@ interface Props {
   /** Constrain the main column to a comfortable reading measure. */
   narrow?: boolean;
   /**
-   * Language of the page's main content. Sets lang and dir on <html>, so an
-   * Arabic writeup mirrors the entire page, not just the article body.
+   * UI locale: nav, footer and the page's own direction. A post written in
+   * another language sets direction on its own <article>, not here — the
+   * chrome stays in the language the reader chose.
    */
-  lang?: Locale;
+  locale?: Locale;
 }
 
 const {
   title,
-  description = site.description,
+  description,
   narrow = false,
-  lang = defaultLocale,
+  locale = defaultLocale,
 } = Astro.props;
 
-const locale = locales[lang];
+const t = useTranslations(locale);
+const active = locales[locale];
 
-const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.university}`;
+const pageTitle = title
+  ? `${title} — ${site.name[locale]}`
+  : `${site.name[locale]} — ${site.university[locale]}`;
 
-// Astro.site comes from `site` in astro.config.mjs. Guarding keeps the build
-// working if someone clears it, rather than throwing at render time.
-const canonical = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site).href
-  : Astro.url.pathname;
+const metaDescription = description ?? site.description[locale];
+
+const basePath = stripLocale(Astro.url.pathname);
+
+const url = (path: string) =>
+  Astro.site ? new URL(path, Astro.site).href : path;
+
+const canonical = url(localizePath(basePath, locale));
+
+// One alternate per locale plus x-default, so a search engine serves the
+// right language and does not treat the two as duplicates of each other.
+const alternates = (Object.keys(locales) as Locale[]).map((code) => ({
+  hreflang: locales[code].htmlLang,
+  href: url(localizePath(basePath, code)),
+}));
 ---
 
-<html lang={locale.htmlLang} dir={locale.dir}>
+<html lang={active.htmlLang} dir={active.dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
 
+    {
+      alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+      ))
+    }
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={url(localizePath(basePath, defaultLocale))}
+    />
+
     <title>{pageTitle}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={site.name} />
+    <meta property="og:site_name" content={site.name[locale]} />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content={locale.htmlLang} />
+    <meta property="og:locale" content={active.htmlLang} />
     <meta name="twitter:card" content="summary" />
 
     <meta name="generator" content={Astro.generator} />
@@ -59,12 +85,12 @@ const canonical = Astro.site
   </head>
 
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <Header />
+    <a class="skip-link" href="#main">{t('a11y.skip')}</a>
+    <Header locale={locale} />
     <main id="main" class:list={['wrap', 'main', { narrow }]}>
       <slot />
     </main>
-    <Footer />
+    <Footer locale={locale} />
   </body>
 </html>
 

@@ -7,14 +7,29 @@
  * person edits — see the handover section of the README.
  */
 
+/**
+ * Club identity. Anything the reader sees in their own language is keyed by
+ * locale; anything language-neutral (an address, a year, a handle) is not.
+ */
 export const site = {
-  name: 'Cybersecurity Club',
-  /** Used in the nav and anywhere space is tight. */
+  name: {
+    en: 'Cybersecurity Club',
+    ar: 'نادي الأمن السيبراني',
+  },
+  /** Used in the nav and anywhere space is tight. Same in both languages. */
   shortName: 'CySC',
-  university: 'University',
-  tagline: 'We break things on purpose, then write down how.',
-  description:
-    'The cybersecurity club archive: member-authored CTF writeups, a learning roadmap, and our competition record.',
+  university: {
+    en: 'University',
+    ar: 'الجامعة',
+  },
+  tagline: {
+    en: 'We break things on purpose, then write down how.',
+    ar: 'نكسر الأشياء عن قصد، ثم نكتب كيف فعلنا ذلك.',
+  },
+  description: {
+    en: 'The cybersecurity club archive: member-authored CTF writeups, a learning roadmap, and our competition record.',
+    ar: 'أرشيف نادي الأمن السيبراني: شروحات مسابقات كتبها الأعضاء، وخارطة طريق للتعلم، وسجل مشاركاتنا.',
+  },
   /** Public contact address. Never a personal one — this outlives its owner. */
   email: 'contact@example.edu',
   /** Year the club was founded, for the footer copyright range. */
@@ -31,21 +46,31 @@ export const site = {
  * `htmlLang` is what goes in the lang attribute; keep it a valid BCP 47 tag.
  */
 export const locales = {
-  en: { label: 'English', nativeLabel: 'English', htmlLang: 'en', dir: 'ltr' },
   ar: { label: 'Arabic', nativeLabel: 'العربية', htmlLang: 'ar', dir: 'rtl' },
+  en: { label: 'English', nativeLabel: 'English', htmlLang: 'en', dir: 'ltr' },
 } as const;
 
 export type Locale = keyof typeof locales;
 
-/** Used for site chrome and for any post that does not declare a language. */
-export const defaultLocale: Locale = 'en';
+/**
+ * The club's primary language. Served unprefixed at the site root; every
+ * other locale gets a path prefix. Also the fallback for a post that does
+ * not declare a language.
+ */
+export const defaultLocale: Locale = 'ar';
 
-/** Primary navigation. Order here is the order rendered. */
+/**
+ * Primary navigation. Order here is the order rendered.
+ *
+ * `key` is a translation key from src/i18n/ui.ts, not a label — the nav must
+ * render in whichever locale the reader chose. `href` is the unprefixed
+ * path; the locale prefix is added at render time.
+ */
 export const nav = [
-  { label: 'Home', href: '/' },
-  { label: 'Blog', href: '/blog/' },
-  { label: 'Roadmap', href: '/roadmap/' },
-  { label: 'Contact', href: '/contact/' },
+  { key: 'nav.home', href: '/' },
+  { key: 'nav.blog', href: '/blog/' },
+  { key: 'nav.roadmap', href: '/roadmap/' },
+  { key: 'nav.contact', href: '/contact/' },
 ] as const;
 
 /**

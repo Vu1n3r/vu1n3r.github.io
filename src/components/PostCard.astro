@@ -1,40 +1,49 @@
 ---
 import FormattedDate from './FormattedDate.astro';
-import { tagHref, type Post } from '../lib/posts';
-import { locales } from '../config';
+import { tagHref, postHref, type Post } from '../lib/posts';
+import { locales, defaultLocale, type Locale } from '../config';
 
 interface Props {
   post: Post;
+  /** UI locale of the listing this card appears in. */
+  locale?: Locale;
 }
 
-const { post } = Astro.props;
+const { post, locale = defaultLocale } = Astro.props;
 const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
 
-// The listing itself stays in the site's direction. Only the title carries
-// the post's own language, so an Arabic heading renders right-to-left in an
-// otherwise left-to-right list without dragging the metadata row with it.
-const locale = locales[lang];
+// The card follows the reader's UI locale. Only the title carries the post's
+// own language, so an Arabic heading renders right-to-left inside an English
+// listing without dragging the metadata row with it.
+const postLocale = locales[lang];
 ---
 
 <article class="card">
   <div class="meta">
-    <FormattedDate date={date} />
+    <FormattedDate date={date} locale={locale} />
     <span class="sep" aria-hidden="true">·</span>
     <span class="author">{author}</span>
     {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
+    {
+      lang !== locale && (
+        <span class="lang-badge" lang={postLocale.htmlLang}>
+          {postLocale.nativeLabel}
+        </span>
+      )
+    }
     <span class="difficulty" data-level={difficulty}>{difficulty}</span>
     {draft && <span class="draft">draft</span>}
   </div>
 
-  <h2 lang={locale.htmlLang} dir={locale.dir}>
-    <a href={`/blog/${post.id}/`}>{title}</a>
+  <h2 lang={postLocale.htmlLang} dir={postLocale.dir}>
+    <a href={postHref(post.id, locale)}>{title}</a>
   </h2>
 
   <ul class="tags">
     {
       tags.map((tag) => (
         <li>
-          <a class="tag" href={tagHref(tag)}>
+          <a class="tag" href={tagHref(tag, locale)}>
             {tag}
           </a>
         </li>
@@ -64,6 +73,16 @@ const locale = locales[lang];
 
   .sep {
     color: var(--border);
+  }
+
+  /* Shown only when the writeup is not in the reader's UI language, so they
+     know before clicking. */
+  .lang-badge {
+    padding: 0 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.7rem;
+    unicode-bidi: isolate;
   }
 
   .difficulty {

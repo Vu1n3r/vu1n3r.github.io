@@ -1,5 +1,13 @@
 ---
-import { site, socials, teams } from '../config';
+import { site, socials, teams, type Locale } from '../config';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
 
 const year = new Date().getFullYear();
 const years = year > site.founded ? `${site.founded}–${year}` : `${site.founded}`;
@@ -11,14 +19,14 @@ const comps = Object.values(teams).filter((t) => t.url !== null);
 <footer class="site-footer">
   <div class="wrap cols">
     <div>
-      <p class="name">{site.name}</p>
-      <p class="muted">{site.tagline}</p>
+      <p class="name">{site.name[locale]}</p>
+      <p class="muted">{site.tagline[locale]}</p>
     </div>
 
     {
       links.length > 0 && (
         <div>
-          <h2>Elsewhere</h2>
+          <h2>{t('footer.elsewhere')}</h2>
           <ul>
             {links.map((s) => (
               <li>
@@ -35,7 +43,7 @@ const comps = Object.values(teams).filter((t) => t.url !== null);
     {
       comps.length > 0 && (
         <div>
-          <h2>Competing</h2>
+          <h2>{t('footer.competing')}</h2>
           <ul>
             {comps.map((t) => (
               <li>
@@ -50,7 +58,7 @@ const comps = Object.values(teams).filter((t) => t.url !== null);
     }
 
     <div>
-      <h2>Contact</h2>
+      <h2>{t('footer.contact')}</h2>
       <ul>
         <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
       </ul>
@@ -58,10 +66,10 @@ const comps = Object.values(teams).filter((t) => t.url !== null);
   </div>
 
   <div class="wrap bottom">
-    <p class="muted">© {years} {site.name}, {site.university}.</p>
     <p class="muted">
-      Writeups are the work of their named authors.
+      © {years} {site.name[locale]}, {site.university[locale]}.
     </p>
+    <p class="muted">{t('footer.credit')}</p>
   </div>
 </footer>
 

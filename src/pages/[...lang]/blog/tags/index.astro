@@ -1,39 +1,46 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { getTags, tagHref } from '../../../lib/posts';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { localePaths } from '../../../../i18n/routes';
+import { useTranslations, localizePath, plural } from '../../../../i18n/ui';
+import { getTags, tagHref } from '../../../../lib/posts';
+
+export const getStaticPaths: GetStaticPaths = () => localePaths();
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
 
 const tags = await getTags();
 ---
 
-<BaseLayout title="Tags" description="Browse club writeups by topic.">
+<BaseLayout title={t('tags.title')} locale={locale}>
   <header class="page-head">
-    <h1>Tags</h1>
-    <p>
-      {tags.length} tag{tags.length === 1 ? '' : 's'} in use. Reuse an existing
-      one where it fits rather than inventing a near-duplicate.
-    </p>
+    <h1>{t('tags.title')}</h1>
+    <p>{tags.length} {t('tags.inUse')}. {t('tags.intro')}</p>
   </header>
 
   {
     tags.length > 0 ? (
       <ul class="grid">
-        {tags.map((t) => (
+        {tags.map((tag) => (
           <li>
-            <a href={tagHref(t.label)}>
-              <span class="label">{t.label}</span>
+            <a href={tagHref(tag.label, locale)}>
+              <span class="label">{tag.label}</span>
               <span class="count">
-                {t.count} post{t.count === 1 ? '' : 's'}
+                {tag.count} {plural(t, tag.count, 'tags.count_one', 'tags.count_other')}
               </span>
             </a>
           </li>
         ))}
       </ul>
     ) : (
-      <p class="empty">No tags yet — no posts yet.</p>
+      <p class="empty">{t('tags.empty')}</p>
     )
   }
 
-  <p class="back"><a href="/blog/">← All writeups</a></p>
+  <p class="back">
+    <a href={localizePath('/blog/', locale)}>← {t('tags.back')}</a>
+  </p>
 </BaseLayout>
 
 <style>
@@ -81,6 +88,7 @@ const tags = await getTags();
   .label {
     font-family: var(--font-mono);
     font-size: 0.9rem;
+    unicode-bidi: isolate;
   }
 
   .count {

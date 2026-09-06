@@ -5,6 +5,7 @@ author: 'Example Member'
 tags: ['web', 'thm', 'enumeration', 'sudo']
 ctf: 'TryHackMe'
 difficulty: easy
+lang: en
 ---
 
 ## Summary

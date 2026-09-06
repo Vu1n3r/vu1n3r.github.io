@@ -1,4 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { defaultLocale, type Locale } from '../config';
+import { localizePath } from '../i18n/ui';
 
 export type Post = CollectionEntry<'blog'>;
 
@@ -28,8 +30,14 @@ export function tagSlug(tag: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export function tagHref(tag: string): string {
-  return `/blog/tags/${tagSlug(tag)}/`;
+/** Tag archive URL within a given UI locale. */
+export function tagHref(tag: string, locale: Locale = defaultLocale): string {
+  return localizePath(`/blog/tags/${tagSlug(tag)}/`, locale);
+}
+
+/** Post URL within a given UI locale. */
+export function postHref(id: string, locale: Locale = defaultLocale): string {
+  return localizePath(`/blog/${id}/`, locale);
 }
 
 export interface TagSummary {
