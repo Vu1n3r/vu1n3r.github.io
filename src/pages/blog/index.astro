@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPosts, getTags, tagHref } from '../../lib/posts';
+import { repo } from '../../config';
+
+const posts = await getPosts();
+const tags = await getTags();
+---
+
+<BaseLayout
+  title="Blog"
+  description="CTF writeups and study notes written by club members."
+>
+  <header class="page-head">
+    <h1>Writeups</h1>
+    <p>
+      Everything here was written by a club member and reviewed before it was
+      published. Want your name on one? <a href={repo.url}>Open a pull request</a
+      >.
+    </p>
+  </header>
+
+  {
+    tags.length > 0 && (
+      <nav class="tag-bar" aria-label="Tags">
+        {tags.map((t) => (
+          <a class="tag" href={tagHref(t.label)}>
+            {t.label} <span class="count">{t.count}</span>
+          </a>
+        ))}
+        <a class="tag all" href="/blog/tags/">
+          all tags →
+        </a>
+      </nav>
+    )
+  }
+
+  {
+    posts.length > 0 ? (
+      <div class="list">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    ) : (
+      <p class="empty">
+        No writeups published yet. The first one is the hardest —{' '}
+        <a href={repo.url}>start here</a>.
+      </p>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .page-head {
+    max-width: var(--measure);
+    margin-bottom: 2rem;
+  }
+
+  .page-head h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+  }
+
+  .page-head p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .tag-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .count {
+    color: var(--text-faint);
+  }
+
+  .all {
+    border-style: dashed;
+  }
+
+  .empty {
+    padding: 3rem 0;
+    color: var(--text-muted);
+  }
+</style>

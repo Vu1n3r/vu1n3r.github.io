@@ -1,0 +1,20 @@
+---
+interface Props {
+  date: Date;
+  /** Adds a leading label, e.g. "Published". */
+  label?: string;
+}
+
+const { date, label } = Astro.props;
+
+// Fixed locale and timezone: the build machine's locale must not change how
+// dates render. UTC avoids a post dated the 1st showing as the 31st.
+const display = date.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<time datetime={date.toISOString()}>{label ? `${label} ` : ''}{display}</time>
