@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { categorySlugs } from './config';
 
 /**
  * Blog collection — CTF writeups and study notes.
@@ -37,6 +38,13 @@ const blog = defineCollection({
 
       // Which CTF/event this came from. Omit for standalone study notes.
       ctf: z.string().optional(),
+
+      // What kind of writing this is: a CTF writeup, a bug bounty report, a
+      // set of study notes. Required with no default — a default would
+      // silently mislabel every post whose author forgot the key, and the
+      // field is only worth having if it can be trusted. Values come from
+      // `categories` in src/config.ts.
+      category: z.enum(categorySlugs),
 
       difficulty: z.enum(['easy', 'medium', 'hard']),
 

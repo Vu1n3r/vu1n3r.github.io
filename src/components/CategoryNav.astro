@@ -1,0 +1,71 @@
+---
+import { useTranslations, type UIKey } from '../i18n/ui';
+import { getCategories, categoryHref } from '../lib/posts';
+import type { CategorySlug } from '../config';
+
+interface Props {
+  /** Slug of the category being viewed, or undefined on the full listing. */
+  current?: CategorySlug;
+}
+
+const { current } = Astro.props;
+const t = useTranslations();
+
+const cats = await getCategories();
+const total = cats.reduce((sum, c) => sum + c.count, 0);
+---
+
+{
+  cats.length > 1 && (
+    <nav class="cats" aria-label={t('a11y.categoryNav')}>
+      <a href="/blog/" aria-current={current === undefined ? 'page' : undefined}>
+        {t('category.all')} <span class="count">{total}</span>
+      </a>
+      {cats.map((c) => (
+        <a
+          href={categoryHref(c.slug)}
+          aria-current={current === c.slug ? 'page' : undefined}
+        >
+          {t(c.key as UIKey)} <span class="count">{c.count}</span>
+        </a>
+      ))}
+    </nav>
+  )
+}
+
+<style>
+  /* Only rendered when there is more than one category in use — a single
+     filter that selects everything is noise, not navigation. */
+  .cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .cats a {
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    text-decoration: none;
+  }
+
+  .cats a:hover {
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .cats a[aria-current='page'] {
+    border-color: var(--accent);
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg-raised));
+  }
+
+  .count {
+    color: var(--text-faint);
+    font-size: 0.8em;
+  }
+</style>

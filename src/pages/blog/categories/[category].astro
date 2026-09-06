@@ -1,0 +1,68 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import CategoryNav from '../../../components/CategoryNav.astro';
+import { useTranslations, plural, type UIKey } from '../../../i18n/ui';
+import { getCategories, getPostsByCategory } from '../../../lib/posts';
+
+/**
+ * One page per category that has posts. Categories with none are not
+ * enumerated, so an unused category has no page to reach — matching the
+ * filter row, which does not offer it either.
+ */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const cats = await getCategories();
+
+  return Promise.all(
+    cats.map(async (c) => ({
+      params: { category: c.slug },
+      props: { slug: c.slug, key: c.key, posts: await getPostsByCategory(c.slug) },
+    })),
+  );
+};
+
+const { slug, key, posts } = Astro.props;
+const t = useTranslations();
+const label = t(key as UIKey);
+---
+
+<BaseLayout title={label}>
+  <header class="page-head">
+    <h1>{label}</h1>
+    <p class="count">
+      {posts.length}{' '}
+      {plural(t, posts.length, 'post.writeupCount_one', 'post.writeupCount_other')}
+    </p>
+  </header>
+
+  <CategoryNav current={slug} />
+
+  <div class="grid">
+    {posts.map((post) => <PostCard post={post} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head {
+    max-width: var(--measure);
+    margin-bottom: 1.25rem;
+  }
+
+  .page-head h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .count {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr));
+    gap: 1rem;
+  }
+</style>

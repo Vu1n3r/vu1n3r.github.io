@@ -3,6 +3,7 @@ title: 'Pickle Rick — from a page source comment to root'
 date: 2026-02-11
 author: 'Example Member'
 tags: ['web', 'thm', 'enumeration', 'sudo']
+category: ctf
 ctf: 'TryHackMe'
 difficulty: easy
 lang: en

@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { categories, type CategorySlug } from '../config';
 
 export type Post = CollectionEntry<'blog'>;
 
@@ -71,4 +72,43 @@ export async function getTags(): Promise<TagSummary[]> {
 export async function getPostsByTag(slug: string): Promise<Post[]> {
   const posts = await getPosts();
   return posts.filter((p) => p.data.tags.some((t) => tagSlug(t) === slug));
+}
+
+/** Category archive URL. */
+export function categoryHref(slug: CategorySlug): string {
+  return `/blog/categories/${slug}/`;
+}
+
+export interface CategorySummary {
+  slug: CategorySlug;
+  /** Translation key for the display label; see src/i18n/ui.ts. */
+  key: string;
+  count: number;
+}
+
+/**
+ * Categories that actually have published posts, in the order declared in
+ * src/config.ts.
+ *
+ * Empty categories are omitted rather than rendered as dead filters: a
+ * category nobody has written for yet is a link to an empty page, which is
+ * worse than not offering it at all. It appears by itself the moment a post
+ * claims it.
+ */
+export async function getCategories(): Promise<CategorySummary[]> {
+  const posts = await getPosts();
+
+  return categories
+    .map((c) => ({
+      slug: c.slug,
+      key: c.key,
+      count: posts.filter((p) => p.data.category === c.slug).length,
+    }))
+    .filter((c) => c.count > 0);
+}
+
+/** Posts in a given category, newest first. */
+export async function getPostsByCategory(slug: CategorySlug): Promise<Post[]> {
+  const posts = await getPosts();
+  return posts.filter((p) => p.data.category === slug);
 }

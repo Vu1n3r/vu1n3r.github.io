@@ -29,6 +29,12 @@ export const ui = {
     'blog.cta': 'تبي اسمك على واحد منها؟',
     'blog.ctaLink': 'افتح طلب دمج',
     'blog.allTags': 'كل الوسوم',
+
+    'category.all': 'الكل',
+    'category.ctf': 'مسابقات CTF',
+    'category.bugbounty': 'صيد الثغرات',
+    'category.notes': 'ملاحظات',
+    'a11y.categoryNav': 'التصنيفات',
     'blog.empty': 'لا توجد شروحات منشورة بعد. الأول هو الأصعب.',
 
     'tags.title': 'الوسوم',
@@ -73,6 +79,12 @@ export const ui = {
     'blog.cta': 'Want your name on one?',
     'blog.ctaLink': 'Open a pull request',
     'blog.allTags': 'all tags',
+
+    'category.all': 'All',
+    'category.ctf': 'CTF',
+    'category.bugbounty': 'Bug Bounty',
+    'category.notes': 'Notes',
+    'a11y.categoryNav': 'Categories',
     'blog.empty': 'No writeups published yet. The first one is the hardest.',
 
     'tags.title': 'Tags',

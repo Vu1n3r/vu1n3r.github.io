@@ -3,6 +3,7 @@ title: 'حل تحدي imagery'
 date: 2026-02-11
 author: 'Example Member'
 tags: ['web', 'thm', 'enumeration', 'sudo']
+category: ctf
 ctf: 'TryHackMe'
 difficulty: easy
 lang: ar

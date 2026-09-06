@@ -16,6 +16,10 @@ author: 'Your Name'
 # check /blog/tags to see what already exists.
 tags: ['web', 'sqli']
 
+# Required. What kind of writing this is. One of: ctf | bugbounty | notes
+# There is no default — say which, or the build fails.
+category: ctf
+
 # Optional. The event this came from. Omit for standalone study notes.
 ctf: 'Event Name 2026'
 

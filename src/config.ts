@@ -76,6 +76,31 @@ export const nav = [
 ] as const;
 
 /**
+ * The kinds of writing the blog holds. Order here is the order rendered.
+ *
+ * This list is the single source of truth: src/content.config.ts builds the
+ * frontmatter enum from it, so a category that exists here is immediately
+ * valid in a post and one that does not fails the build. Adding a category
+ * means an entry here plus its label in both dictionaries in src/i18n/ui.ts.
+ *
+ * `slug` is the URL segment and the frontmatter value. Do not rename one
+ * after posts start using it — that breaks their archive URLs.
+ */
+export const categories = [
+  { slug: 'ctf', key: 'category.ctf' },
+  { slug: 'bugbounty', key: 'category.bugbounty' },
+  { slug: 'notes', key: 'category.notes' },
+] as const;
+
+export type CategorySlug = (typeof categories)[number]['slug'];
+
+/** Frontmatter enum values, derived so the schema cannot drift from the list. */
+export const categorySlugs = categories.map((c) => c.slug) as [
+  CategorySlug,
+  ...CategorySlug[],
+];
+
+/**
  * External presence. `handle` is displayed, `url` is linked.
  * Set url to null to hide an entry without deleting the record of it.
  */

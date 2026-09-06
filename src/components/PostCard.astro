@@ -1,14 +1,19 @@
 ---
 import FormattedDate from './FormattedDate.astro';
-import { tagHref, postHref, type Post } from '../lib/posts';
-import { locales, siteLocale } from '../config';
+import { tagHref, postHref, categoryHref, type Post } from '../lib/posts';
+import { locales, siteLocale, categories } from '../config';
+import { useTranslations, type UIKey } from '../i18n/ui';
 
 interface Props {
   post: Post;
 }
 
 const { post } = Astro.props;
-const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
+const { title, date, author, tags, ctf, difficulty, draft, lang, category } =
+  post.data;
+
+const t = useTranslations();
+const categoryKey = categories.find((c) => c.slug === category)!.key;
 
 // The card runs in the site's direction. Only the title carries the post's
 // own language, so an English heading renders left-to-right inside the
@@ -18,6 +23,9 @@ const postLocale = locales[lang];
 
 <article class="card" data-level={difficulty}>
   <div class="top">
+    {/* Raised above the stretched card link so it stays clickable. */}
+    <a class="cat" href={categoryHref(category)}>{t(categoryKey as UIKey)}</a>
+    <span class="sep" aria-hidden="true">·</span>
     <FormattedDate date={date} />
     {draft && <span class="draft">draft</span>}
     {
@@ -106,6 +114,22 @@ const postLocale = locales[lang];
     gap: 0.4rem;
     color: var(--text-faint);
     font-size: 0.78rem;
+  }
+
+  .cat {
+    position: relative;
+    z-index: 1;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .cat:hover {
+    text-decoration: underline;
+  }
+
+  .sep {
+    color: var(--border);
   }
 
   .badge,
