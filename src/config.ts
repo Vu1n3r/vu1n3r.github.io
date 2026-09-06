@@ -21,6 +21,25 @@ export const site = {
   founded: 2026,
 } as const;
 
+/**
+ * Languages a writeup may be written in.
+ *
+ * `dir` drives the `dir` attribute on <html>, so adding a language here is
+ * all that is needed for it to render in the correct direction — nothing
+ * else in the codebase branches on a language code.
+ *
+ * `htmlLang` is what goes in the lang attribute; keep it a valid BCP 47 tag.
+ */
+export const locales = {
+  en: { label: 'English', nativeLabel: 'English', htmlLang: 'en', dir: 'ltr' },
+  ar: { label: 'Arabic', nativeLabel: 'العربية', htmlLang: 'ar', dir: 'rtl' },
+} as const;
+
+export type Locale = keyof typeof locales;
+
+/** Used for site chrome and for any post that does not declare a language. */
+export const defaultLocale: Locale = 'en';
+
 /** Primary navigation. Order here is the order rendered. */
 export const nav = [
   { label: 'Home', href: '/' },

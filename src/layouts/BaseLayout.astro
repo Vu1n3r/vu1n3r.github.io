@@ -1,7 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { site } from '../config';
+import { site, locales, defaultLocale, type Locale } from '../config';
 import '../styles/global.css';
 
 interface Props {
@@ -11,9 +11,21 @@ interface Props {
   description?: string;
   /** Constrain the main column to a comfortable reading measure. */
   narrow?: boolean;
+  /**
+   * Language of the page's main content. Sets lang and dir on <html>, so an
+   * Arabic writeup mirrors the entire page, not just the article body.
+   */
+  lang?: Locale;
 }
 
-const { title, description = site.description, narrow = false } = Astro.props;
+const {
+  title,
+  description = site.description,
+  narrow = false,
+  lang = defaultLocale,
+} = Astro.props;
+
+const locale = locales[lang];
 
 const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.university}`;
 
@@ -24,7 +36,7 @@ const canonical = Astro.site
   : Astro.url.pathname;
 ---
 
-<html lang="en">
+<html lang={locale.htmlLang} dir={locale.dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,6 +51,7 @@ const canonical = Astro.site
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale.htmlLang} />
     <meta name="twitter:card" content="summary" />
 
     <meta name="generator" content={Astro.generator} />

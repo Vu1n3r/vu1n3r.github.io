@@ -113,7 +113,7 @@ hr {
 
 .skip-link {
   position: absolute;
-  left: -9999px;
+  inset-inline-start: -9999px;
   top: 0;
   background: var(--accent);
   color: var(--bg-inset);
@@ -123,7 +123,7 @@ hr {
 }
 
 .skip-link:focus {
-  left: 0;
+  inset-inline-start: 0;
 }
 
 /* --- shared bits --- */
@@ -204,7 +204,7 @@ a.tag:hover {
 
 .prose ul,
 .prose ol {
-  padding-left: 1.3rem;
+  padding-inline-start: 1.3rem;
 }
 
 .prose li + li {
@@ -220,8 +220,9 @@ a.tag:hover {
 
 .prose blockquote {
   margin: 1.5rem 0;
-  padding: 0.25rem 0 0.25rem 1rem;
-  border-left: 3px solid var(--border);
+  padding-block: 0.25rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid var(--border);
   color: var(--text-muted);
 }
 
@@ -265,7 +266,7 @@ a.tag:hover {
 .prose td {
   padding: 0.45rem 0.75rem;
   border: 1px solid var(--border-soft);
-  text-align: left;
+  text-align: start;
 }
 
 .prose th {
@@ -279,9 +280,42 @@ a.tag:hover {
 
 /* Task lists in the submission checklist render as bare list items. */
 .prose input[type='checkbox'] {
-  margin-right: 0.4rem;
+  margin-inline-end: 0.4rem;
   accent-color: var(--accent);
 }
 
 /* Anchor target offset for TOC jumps is handled by scroll-padding-top on
    html, so headings don't need individual offsets. */
+
+/* --- direction -----------------------------------------------------------
+   Direction comes from `dir` on <html>, set per post from its `lang`
+   frontmatter. Everything above uses logical properties (inline-start/end,
+   text-align: start) so the layout mirrors on its own.
+
+   Code is the exception. A shell command, a nmap dump or a Python snippet is
+   left-to-right regardless of the prose around it — reversing it would make
+   it wrong, not merely odd. Force LTR and isolate it from the surrounding
+   bidi run so an Arabic paragraph cannot drag a command's punctuation to the
+   wrong end. */
+
+.prose pre,
+.prose code,
+.prose kbd,
+.prose samp {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
+
+/* Terminal output frequently contains paths and flags that the bidi
+   algorithm would otherwise reorder inside an RTL paragraph. */
+.prose pre code {
+  unicode-bidi: isolate-override;
+}
+
+/* Numbers, tags and dates are LTR runs; isolating them keeps punctuation
+   attached to the correct end inside RTL text. */
+.tag,
+time {
+  unicode-bidi: isolate;
+}

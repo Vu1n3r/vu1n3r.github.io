@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import { getPosts, tagHref } from '../../lib/posts';
+import { locales } from '../../config';
 
 /**
  * One page per published post. `posts` is already newest-first, so the entry
@@ -24,7 +25,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 const { post, newer, older } = Astro.props;
-const { title, date, author, tags, ctf, difficulty, draft } = post.data;
+const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
 
 // render() returns the compiled component plus the heading tree Astro built
 // while parsing the markdown. Both come from the same pass — the TOC can
@@ -32,7 +33,7 @@ const { title, date, author, tags, ctf, difficulty, draft } = post.data;
 const { Content, headings } = await render(post);
 ---
 
-<BaseLayout title={title} description={`${difficulty} · by ${author}`}>
+<BaseLayout title={title} description={`${difficulty} · by ${author}`} lang={lang}>
   <article class="post">
     <header class="head">
       <p class="eyebrow"><a href="/blog/">Writeups</a></p>
@@ -88,7 +89,9 @@ const { Content, headings } = await render(post);
           {older && (
             <a href={`/blog/${older.id}/`}>
               <span class="dir">← Older</span>
-              <span class="t">{older.data.title}</span>
+              <span class="t" lang={older.data.lang} dir={locales[older.data.lang].dir}>
+                {older.data.title}
+              </span>
             </a>
           )}
         </div>
@@ -96,7 +99,9 @@ const { Content, headings } = await render(post);
           {newer && (
             <a href={`/blog/${newer.id}/`}>
               <span class="dir">Newer →</span>
-              <span class="t">{newer.data.title}</span>
+              <span class="t" lang={newer.data.lang} dir={locales[newer.data.lang].dir}>
+                {newer.data.title}
+              </span>
             </a>
           )}
         </div>
@@ -217,7 +222,7 @@ const { Content, headings } = await render(post);
   }
 
   .next a {
-    text-align: right;
+    text-align: end;
   }
 
   .dir {

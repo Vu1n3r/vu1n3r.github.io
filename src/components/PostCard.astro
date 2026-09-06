@@ -1,13 +1,19 @@
 ---
 import FormattedDate from './FormattedDate.astro';
 import { tagHref, type Post } from '../lib/posts';
+import { locales } from '../config';
 
 interface Props {
   post: Post;
 }
 
 const { post } = Astro.props;
-const { title, date, author, tags, ctf, difficulty, draft } = post.data;
+const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
+
+// The listing itself stays in the site's direction. Only the title carries
+// the post's own language, so an Arabic heading renders right-to-left in an
+// otherwise left-to-right list without dragging the metadata row with it.
+const locale = locales[lang];
 ---
 
 <article class="card">
@@ -20,7 +26,7 @@ const { title, date, author, tags, ctf, difficulty, draft } = post.data;
     {draft && <span class="draft">draft</span>}
   </div>
 
-  <h2>
+  <h2 lang={locale.htmlLang} dir={locale.dir}>
     <a href={`/blog/${post.id}/`}>{title}</a>
   </h2>
 
@@ -61,7 +67,7 @@ const { title, date, author, tags, ctf, difficulty, draft } = post.data;
   }
 
   .difficulty {
-    margin-left: auto;
+    margin-inline-start: auto;
   }
 
   .draft {
