@@ -39,7 +39,7 @@ const tags = await getTags();
 
   {
     posts.length > 0 ? (
-      <div class="list">
+      <div class="grid">
         {posts.map((post) => (
           <PostCard post={post} />
         ))}
@@ -73,7 +73,18 @@ const tags = await getTags();
     flex-wrap: wrap;
     gap: 0.4rem;
     padding-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
     border-bottom: 1px solid var(--border-soft);
+  }
+
+  /* auto-fill, not auto-fit: with two posts on a wide screen, auto-fit would
+     stretch them across the full width and they would read as banners rather
+     than cards. auto-fill keeps the column width honest while the archive is
+     still small. */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr));
+    gap: 1rem;
   }
 
   .count {

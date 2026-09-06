@@ -10,72 +10,106 @@ interface Props {
 const { post } = Astro.props;
 const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
 
-// The listing runs in the site's direction. Only the title carries the post's
+// The card runs in the site's direction. Only the title carries the post's
 // own language, so an English heading renders left-to-right inside the
-// right-to-left list without dragging the metadata row with it.
+// right-to-left grid without dragging the metadata row with it.
 const postLocale = locales[lang];
 ---
 
-<article class="card">
-  <div class="meta">
+<article class="card" data-level={difficulty}>
+  <div class="top">
     <FormattedDate date={date} />
-    <span class="sep" aria-hidden="true">·</span>
-    <span class="author">{author}</span>
-    {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
+    {draft && <span class="draft">draft</span>}
     {
       lang !== siteLocale && (
-        <span class="lang-badge" lang={postLocale.htmlLang}>
+        <span class="badge" lang={postLocale.htmlLang}>
           {postLocale.nativeLabel}
         </span>
       )
     }
-    <span class="difficulty" data-level={difficulty}>{difficulty}</span>
-    {draft && <span class="draft">draft</span>}
   </div>
 
+  {/*
+    The link covers the whole card via ::after, so the entire card is a click
+    target without nesting the tag links inside an <a>, which is invalid.
+    The tag list sits above it on the z axis so those stay clickable.
+  */}
   <h2 lang={postLocale.htmlLang} dir={postLocale.dir}>
     <a href={postHref(post.id)}>{title}</a>
   </h2>
 
-  <ul class="tags">
-    {
-      tags.map((tag) => (
-        <li>
-          <a class="tag" href={tagHref(tag)}>
-            {tag}
-          </a>
-        </li>
-      ))
-    }
-  </ul>
+  {ctf && <p class="source">{ctf}</p>}
+
+  <footer class="bottom">
+    <ul class="tags">
+      {
+        tags.slice(0, 3).map((tag) => (
+          <li>
+            <a class="tag" href={tagHref(tag)}>
+              {tag}
+            </a>
+          </li>
+        ))
+      }
+      {tags.length > 3 && <li class="more">+{tags.length - 3}</li>}
+    </ul>
+
+    <span class="difficulty" data-level={difficulty}>{difficulty}</span>
+  </footer>
 </article>
 
 <style>
   .card {
-    padding: 1.25rem 0;
-    border-bottom: 1px solid var(--border-soft);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
   }
 
-  .meta {
+  /* A quiet difficulty cue on the card's leading edge — readable at a glance
+     across a grid without adding another coloured chip to every card. */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset-block: -1px;
+    inset-inline-start: -1px;
+    width: 3px;
+    border-start-start-radius: var(--radius);
+    border-end-start-radius: var(--radius);
+    background: var(--border);
+  }
+
+  .card[data-level='easy']::before {
+    background: var(--easy);
+  }
+  .card[data-level='medium']::before {
+    background: var(--medium);
+  }
+  .card[data-level='hard']::before {
+    background: var(--hard);
+  }
+
+  .card:hover,
+  .card:focus-within {
+    border-color: var(--accent);
+  }
+
+  .top {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
     color: var(--text-faint);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
   }
 
-  .author {
-    color: var(--text-muted);
-  }
-
-  .sep {
-    color: var(--border);
-  }
-
-  /* Shown only when the writeup is not in the reader's UI language, so they
-     know before clicking. */
-  .lang-badge {
+  .badge,
+  .draft {
     padding: 0 0.4rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -83,23 +117,17 @@ const postLocale = locales[lang];
     unicode-bidi: isolate;
   }
 
-  .difficulty {
-    margin-inline-start: auto;
-  }
-
   .draft {
-    padding: 0 0.4rem;
-    border: 1px solid var(--medium);
-    border-radius: var(--radius);
+    border-color: var(--medium);
     color: var(--medium);
     font-family: var(--font-mono);
-    font-size: 0.7rem;
     text-transform: uppercase;
   }
 
   h2 {
-    margin: 0.4rem 0 0.6rem;
-    font-size: 1.2rem;
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.35;
   }
 
   h2 a {
@@ -107,16 +135,55 @@ const postLocale = locales[lang];
     text-decoration: none;
   }
 
-  h2 a:hover {
+  /* Stretches the link over the whole card. */
+  h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  .card:hover h2 a {
     color: var(--link);
+  }
+
+  .source {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* Pins the footer to the bottom so cards of differing title length still
+       line their tags and difficulty up across a row. */
+    margin-block-start: auto;
+    padding-block-start: 0.6rem;
   }
 
   .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 0.3rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    /* Above the stretched link, so tag links remain clickable. */
+    position: relative;
+    z-index: 1;
+  }
+
+  .more {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    align-self: center;
+  }
+
+  .difficulty {
+    margin-inline-start: auto;
+    font-size: 0.7rem;
   }
 </style>
