@@ -67,13 +67,17 @@ const { Content, headings } = await render(post);
     </header>
 
     <div class="body">
-      <aside class="side">
-        <TableOfContents headings={headings} />
-      </aside>
-
+      {/* Article first in source order: it is the primary content, and on a
+          narrow screen the reader should reach it without scrolling past a
+          contents list. CSS `order` hoists the TOC above it on mobile and
+          parks it in the right-hand column on desktop. */}
       <div class="prose">
         <Content />
       </div>
+
+      <aside class="side">
+        <TableOfContents headings={headings} />
+      </aside>
     </div>
   </article>
 
