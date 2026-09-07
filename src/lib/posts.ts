@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { categories, type CategorySlug } from '../config';
+import { categories, type CategorySlug, type ScaleName } from '../config';
 
 export type Post = CollectionEntry<'blog'>;
 
@@ -111,4 +111,27 @@ export async function getCategories(): Promise<CategorySummary[]> {
 export async function getPostsByCategory(slug: CategorySlug): Promise<Post[]> {
   const posts = await getPosts();
   return posts.filter((p) => p.data.category === slug);
+}
+
+export interface Rating {
+  /** Which scale the level sits on. Drives the chip's accessible label. */
+  scale: ScaleName;
+  /** The level itself, e.g. 'medium' on difficulty or 'critical' on severity. */
+  level: string;
+}
+
+/**
+ * The rating to show for a post, or null if its category is not rated.
+ *
+ * Every page asks this rather than reading `data.difficulty` directly, so
+ * adding a category with a new scale is a change to src/config.ts and nowhere
+ * else. The schema guarantees the field is present when the category calls
+ * for it, so a null here means 'not rated', never 'author forgot'.
+ */
+export function postRating(data: Post['data']): Rating | null {
+  const scale = categories.find((c) => c.slug === data.category)?.scale;
+  if (!scale) return null;
+
+  const level = data[scale];
+  return level ? { scale, level } : null;
 }

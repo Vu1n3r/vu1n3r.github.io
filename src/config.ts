@@ -87,9 +87,9 @@ export const nav = [
  * after posts start using it — that breaks their archive URLs.
  */
 export const categories = [
-  { slug: 'ctf', key: 'category.ctf' },
-  { slug: 'bugbounty', key: 'category.bugbounty' },
-  { slug: 'notes', key: 'category.notes' },
+  { slug: 'ctf', key: 'category.ctf', scale: 'difficulty' },
+  { slug: 'bugbounty', key: 'category.bugbounty', scale: 'severity' },
+  { slug: 'notes', key: 'category.notes', scale: null },
 ] as const;
 
 export type CategorySlug = (typeof categories)[number]['slug'];
@@ -99,6 +99,39 @@ export const categorySlugs = categories.map((c) => c.slug) as [
   CategorySlug,
   ...CategorySlug[],
 ];
+
+/**
+ * How a post is rated, by category.
+ *
+ * A CTF writeup carries a difficulty; a bug bounty report carries a severity.
+ * Same mechanic — one ordered scale rendered as one coloured chip — but they
+ * measure different things, so they are separate frontmatter fields and a post
+ * carries exactly the one its category calls for. Study notes carry neither:
+ * `scale: null` above, and the schema rejects both fields on them.
+ *
+ * Each scale is listed the way its field is conventionally read — difficulty
+ * easiest-first, severity worst-first — and severity uses the words a triage
+ * team already uses (HackerOne, CVSS) rather than club-local wording.
+ */
+export const scales = {
+  difficulty: ['easy', 'medium', 'hard'],
+  severity: ['critical', 'high', 'medium', 'low', 'info'],
+} as const;
+
+export type ScaleName = keyof typeof scales;
+
+/** The scale a category rates on, or null if it is not rated. */
+export type CategoryScale = (typeof categories)[number]['scale'];
+
+export type Difficulty = (typeof scales)['difficulty'][number];
+export type Severity = (typeof scales)['severity'][number];
+
+/** Frontmatter enum values, derived so the schema cannot drift from `scales`. */
+export const difficultyLevels = [...scales.difficulty] as [
+  Difficulty,
+  ...Difficulty[],
+];
+export const severityLevels = [...scales.severity] as [Severity, ...Severity[]];
 
 /**
  * External presence. `handle` is displayed, `url` is linked.

@@ -1,6 +1,12 @@
 ---
 import FormattedDate from './FormattedDate.astro';
-import { tagHref, postHref, categoryHref, type Post } from '../lib/posts';
+import {
+  tagHref,
+  postHref,
+  categoryHref,
+  postRating,
+  type Post,
+} from '../lib/posts';
 import { locales, siteLocale, categories } from '../config';
 import { useTranslations, type UIKey } from '../i18n/ui';
 
@@ -9,8 +15,11 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, date, author, tags, ctf, difficulty, draft, lang, category } =
-  post.data;
+const { title, date, author, tags, ctf, draft, lang, category } = post.data;
+
+// Difficulty on a CTF writeup, severity on a bug bounty report, nothing on a
+// study note. The card doesn't care which — it renders whatever it gets.
+const rating = postRating(post.data);
 
 const t = useTranslations();
 const categoryKey = categories.find((c) => c.slug === category)!.key;
@@ -21,7 +30,7 @@ const categoryKey = categories.find((c) => c.slug === category)!.key;
 const postLocale = locales[lang];
 ---
 
-<article class="card" data-level={difficulty}>
+<article class="card" data-level={rating?.level}>
   <div class="top">
     {/* Raised above the stretched card link so it stays clickable. */}
     <a class="cat" href={categoryHref(category)}>{t(categoryKey as UIKey)}</a>
@@ -62,7 +71,17 @@ const postLocale = locales[lang];
       {tags.length > 3 && <li class="more">+{tags.length - 3}</li>}
     </ul>
 
-    <span class="difficulty" data-level={difficulty}>{difficulty}</span>
+    {
+      rating && (
+        <span
+          class="rating"
+          data-level={rating.level}
+          aria-label={`${t(`rating.${rating.scale}` as UIKey)}: ${rating.level}`}
+        >
+          {rating.level}
+        </span>
+      )
+    }
   </footer>
 </article>
 
@@ -79,8 +98,10 @@ const postLocale = locales[lang];
     background: var(--bg-raised);
   }
 
-  /* A quiet difficulty cue on the card's leading edge — readable at a glance
-     across a grid without adding another coloured chip to every card. */
+  /* A quiet rating cue on the card's leading edge — readable at a glance
+     across a grid without adding another coloured chip to every card. The
+     colour comes from --level, resolved in global.css from data-level; an
+     unrated card leaves the attribute off and keeps the default border. */
   .card::before {
     content: '';
     position: absolute;
@@ -89,17 +110,7 @@ const postLocale = locales[lang];
     width: 3px;
     border-start-start-radius: var(--radius);
     border-end-start-radius: var(--radius);
-    background: var(--border);
-  }
-
-  .card[data-level='easy']::before {
-    background: var(--easy);
-  }
-  .card[data-level='medium']::before {
-    background: var(--medium);
-  }
-  .card[data-level='hard']::before {
-    background: var(--hard);
+    background: var(--level, var(--border));
   }
 
   .card:hover,
@@ -142,8 +153,8 @@ const postLocale = locales[lang];
   }
 
   .draft {
-    border-color: var(--medium);
-    color: var(--medium);
+    border-color: var(--level-medium);
+    color: var(--level-medium);
     font-family: var(--font-mono);
     text-transform: uppercase;
   }
@@ -182,7 +193,7 @@ const postLocale = locales[lang];
     align-items: center;
     gap: 0.5rem;
     /* Pins the footer to the bottom so cards of differing title length still
-       line their tags and difficulty up across a row. */
+       line their tags and ratings up across a row. */
     margin-block-start: auto;
     padding-block-start: 0.6rem;
   }
@@ -206,7 +217,7 @@ const postLocale = locales[lang];
     align-self: center;
   }
 
-  .difficulty {
+  .rating {
     margin-inline-start: auto;
     font-size: 0.7rem;
   }

@@ -1,7 +1,13 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { categorySlugs } from './config';
+import {
+  categories,
+  categorySlugs,
+  difficultyLevels,
+  scales,
+  severityLevels,
+} from './config';
 
 /**
  * Blog collection — CTF writeups and study notes.
@@ -46,7 +52,13 @@ const blog = defineCollection({
       // `categories` in src/config.ts.
       category: z.enum(categorySlugs),
 
-      difficulty: z.enum(['easy', 'medium', 'hard']),
+      // How the post is rated. Which of these two a post carries is decided
+      // by its category, not by the author's preference — see the check
+      // below. Both are optional here so that the cross-field rule can
+      // report a useful message instead of zod complaining about the wrong
+      // one. Values come from `scales` in src/config.ts.
+      difficulty: z.enum(difficultyLevels).optional(),
+      severity: z.enum(severityLevels).optional(),
 
       // Language the post is written in. Drives the lang and dir attributes
       // on the article — 'ar' renders it right-to-left. Defaults to Arabic,
@@ -60,7 +72,42 @@ const blog = defineCollection({
     })
     // Reject unknown keys. Catches typos like `titel:` or `tag:` in a PR
     // instead of silently dropping the value.
-    .strict(),
+    .strict()
+    /**
+     * A post is rated on exactly the scale its category calls for.
+     *
+     * A CTF writeup needs `difficulty`, a bug bounty report needs `severity`,
+     * a study note needs neither. Rejecting the wrong field rather than
+     * ignoring it matters: `severity: high` silently dropped from a CTF
+     * writeup looks published-and-fine to its author, and a bug bounty report
+     * that rates itself `difficulty: easy` is describing the wrong thing to
+     * the reader.
+     */
+    .superRefine((data, ctx) => {
+      const scale = categories.find((c) => c.slug === data.category)?.scale;
+
+      for (const field of ['difficulty', 'severity'] as const) {
+        const given = data[field] !== undefined;
+
+        if (field === scale && !given) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [field],
+            message: `a '${data.category}' post needs ${field}: one of ${scales[field].join(' | ')}`,
+          });
+        }
+
+        if (field !== scale && given) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [field],
+            message: scale
+              ? `${field} does not apply to a '${data.category}' post — use ${scale} instead`
+              : `a '${data.category}' post is not rated; remove ${field}`,
+          });
+        }
+      }
+    }),
 });
 
 export const collections = { blog };

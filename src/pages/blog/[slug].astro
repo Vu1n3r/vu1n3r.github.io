@@ -4,8 +4,8 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
-import { useTranslations } from '../../i18n/ui';
-import { getPosts, tagHref, postHref } from '../../lib/posts';
+import { useTranslations, type UIKey } from '../../i18n/ui';
+import { getPosts, tagHref, postHref, postRating } from '../../lib/posts';
 import { locales, siteLocale } from '../../config';
 
 /**
@@ -26,7 +26,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 const { post, newer, older } = Astro.props;
-const { title, date, author, tags, ctf, difficulty, draft, lang } = post.data;
+const { title, date, author, tags, ctf, draft, lang } = post.data;
+
+// Difficulty on a CTF writeup, severity on a bug bounty report, null on a
+// study note. See postRating() — the page never reads either field directly.
+const rating = postRating(post.data);
 
 const t = useTranslations();
 
@@ -39,7 +43,7 @@ const { Content, headings } = await render(post);
 
 <BaseLayout
   title={title}
-  description={`${difficulty} · ${author}`}
+  description={rating ? `${rating.level} · ${author}` : author}
   contentLang={lang}
   wide
 >
@@ -57,7 +61,17 @@ const { Content, headings } = await render(post);
         <span class="sep" aria-hidden="true">·</span>
         <span class="author">{author}</span>
         {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
-        <span class="difficulty" data-level={difficulty}>{difficulty}</span>
+        {
+          rating && (
+            <span
+              class="rating"
+              data-level={rating.level}
+              aria-label={`${t(`rating.${rating.scale}` as UIKey)}: ${rating.level}`}
+            >
+              {rating.level}
+            </span>
+          )
+        }
       </div>
 
       {
@@ -192,9 +206,9 @@ const { Content, headings } = await render(post);
   .draft-notice {
     margin: 1rem 0 0;
     padding: 0.6rem 0.9rem;
-    border: 1px solid var(--medium);
+    border: 1px solid var(--level-medium);
     border-radius: var(--radius);
-    color: var(--medium);
+    color: var(--level-medium);
     font-size: 0.85rem;
   }
 

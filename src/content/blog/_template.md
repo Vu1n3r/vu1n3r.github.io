@@ -23,7 +23,15 @@ category: ctf
 # Optional. The event this came from. Omit for standalone study notes.
 ctf: 'Event Name 2026'
 
-# Required. One of: easy | medium | hard
+# How the post is rated. WHICH of these two fields you use is decided by your
+# category, not by preference — the build rejects the wrong one.
+#
+#   category: ctf        ->  difficulty: easy | medium | hard
+#   category: bugbounty  ->  severity: critical | high | medium | low | info
+#   category: notes      ->  neither; delete both lines
+#
+# Severity is the impact of the bug you found, not how hard it was to find.
+# Rate it the way you would in the report you sent the vendor.
 difficulty: easy
 
 # Optional, defaults to 'ar'. One of: ar | en

@@ -35,6 +35,8 @@ export const ui = {
     'category.bugbounty': 'صيد الثغرات',
     'category.notes': 'ملاحظات',
     'a11y.categoryNav': 'التصنيفات',
+    'rating.difficulty': 'الصعوبة',
+    'rating.severity': 'الخطورة',
     'blog.empty': 'لا توجد شروحات منشورة بعد. الأول هو الأصعب.',
 
     'tags.title': 'الوسوم',
@@ -85,6 +87,8 @@ export const ui = {
     'category.bugbounty': 'Bug Bounty',
     'category.notes': 'Notes',
     'a11y.categoryNav': 'Categories',
+    'rating.difficulty': 'Difficulty',
+    'rating.severity': 'Severity',
     'blog.empty': 'No writeups published yet. The first one is the hardest.',
 
     'tags.title': 'Tags',

@@ -14,9 +14,19 @@
   --accent-dim: #2ea043;
   --link: #58a6ff;
 
-  --easy: #3fb950;
-  --medium: #d29922;
-  --hard: #f85149;
+  /* Rating levels. Difficulty and severity are separate scales but share one
+     palette, keyed by level name: green reads as good news on both, red as
+     bad. 'medium' is the same colour on either scale, deliberately. Severity
+     follows the usual five-step ramp so it looks like every other triage
+     dashboard a member has seen. */
+  --level-easy: #3fb950;
+  --level-medium: #d29922;
+  --level-hard: #f85149;
+
+  --level-critical: #f85149;
+  --level-high: #e8823a;
+  --level-low: #3fb950;
+  --level-info: #58a6ff;
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     Helvetica, Arial, sans-serif;
@@ -147,22 +157,59 @@ a.tag:hover {
   color: var(--text);
 }
 
-.difficulty {
+/* A post's rating — difficulty on a CTF writeup, severity on a bug bounty
+   report. One mechanic, one chip; only the scale behind it differs.
+
+   Anything carrying data-level resolves --level to that level's colour, so a
+   card edge and the chip inside it both pick it up without either of them
+   needing to know which scale is in play. Levels are named uniquely across
+   the two scales, apart from 'medium', which shares a colour on purpose. */
+
+[data-level] {
+  --level: var(--border);
+}
+
+[data-level='easy'] {
+  --level: var(--level-easy);
+}
+[data-level='medium'] {
+  --level: var(--level-medium);
+}
+[data-level='hard'] {
+  --level: var(--level-hard);
+}
+[data-level='critical'] {
+  --level: var(--level-critical);
+}
+[data-level='high'] {
+  --level: var(--level-high);
+}
+[data-level='low'] {
+  --level: var(--level-low);
+}
+[data-level='info'] {
+  --level: var(--level-info);
+}
+
+.rating {
+  color: var(--level);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  /* Keeps the Latin word from reordering inside a right-to-left meta row. */
+  unicode-bidi: isolate;
 }
 
-.difficulty[data-level='easy'] {
-  color: var(--easy);
-}
-.difficulty[data-level='medium'] {
-  color: var(--medium);
-}
-.difficulty[data-level='hard'] {
-  color: var(--hard);
+/* Critical is the only level that gets more than colour. Red alone does not
+   separate it from high at a glance, and 'the worst one' is the reading a
+   report must not lose. */
+.rating[data-level='critical'] {
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius);
+  background: var(--level);
+  color: var(--bg-inset);
 }
 
 /* --- rendered markdown ---------------------------------------------------
