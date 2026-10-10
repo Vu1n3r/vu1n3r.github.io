@@ -62,12 +62,18 @@ transfer access to the incoming committee. Never commit credentials.
 
 ## Deployment and planned features
 
-Cloudflare Pages is the intended host: use `npm run build` with output directory
-`dist`. For a connected Git repository, a push to the configured production branch
-triggers redeployment. Confirm the actual hosting setup with the account owner;
-this repository does not configure it. Set the approved domain in
-`astro.config.mjs` and add the security `_headers` described in `CLAUDE.md` before
-public deployment.
+GitHub Pages builds the Astro site with `.github/workflows/deploy.yml` on pushes
+to `main` and publishes the generated `dist` directory. In the repository's
+Settings → Pages, set **Build and deployment → Source** to **GitHub Actions**;
+the default branch/Jekyll source cannot build `.astro` files. This repository is
+`vu1n3r.github.io`, so it deploys at `https://vu1n3r.github.io/` without an
+Astro `base` path.
+
+Cloudflare Pages can also build with `npm run build` and output directory `dist`.
+The GitHub workflow sets `SITE_URL` for correct canonical links on GitHub Pages;
+local and Cloudflare builds retain the existing Cloudflare URL. Set the approved
+domain in `astro.config.mjs` when the final host is chosen, and add the security
+`_headers` described in `CLAUDE.md` before public deployment.
 
 Challenges belong in the separate CTFd installation, not in this repository.
 Leaderboard integration, challenge administration, and team standings are not

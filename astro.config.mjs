@@ -3,12 +3,12 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: replace with the club's real domain once university IT has signed off.
-  // Used for canonical URLs, sitemap and RSS. Must be set before we ship.
-  site: 'https://cysc.pages.dev',
+  // The Pages workflow supplies its public URL; keep the Cloudflare URL for
+  // local builds and any existing Cloudflare deployment.
+  site: process.env.SITE_URL ?? 'https://cysc.pages.dev',
 
-  // Static output. No adapter — Cloudflare Pages serves the built files, and
-  // the CTFd proxy will live in a Pages Function, not in Astro.
+  // Static output. GitHub Pages and Cloudflare Pages both serve the built files.
+  // The planned CTFd proxy would live in a Cloudflare Pages Function.
   output: 'static',
 
   markdown: {
