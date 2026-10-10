@@ -1,10 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import CategoryNav from '../../components/CategoryNav.astro';
-import { useTranslations } from '../../i18n/ui';
-import { getPosts, getTags, tagHref } from '../../lib/posts';
-import { repo } from '../../config';
+import { useTranslations, type UIKey } from '../../i18n/ui';
+import { getPosts, getTags, tagSlug } from '../../lib/posts';
+import { categories, repo } from '../../config';
 
 const t = useTranslations();
 
@@ -23,28 +22,49 @@ const tags = await getTags();
     </p>
   </header>
 
-  <CategoryNav />
-
-  {
-    tags.length > 0 && (
-      <nav class="tag-bar" aria-label={t('tags.title')}>
-        {tags.map((tag) => (
-          <a class="tag" href={tagHref(tag.label)}>
-            {tag.label} <span class="count">{tag.count}</span>
-          </a>
+  <div class="filters" id="blog-filters" role="group" aria-label={t('a11y.blogFilters')}>
+    <details class="filter-menu" data-filter="category" name="blog-filter">
+      <summary>
+        <span>{t('a11y.categoryNav')}: <span class="selected-label">{t('category.all')}</span></span>
+        <span class="chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="options">
+        <button type="button" data-value="" data-label={t('category.all')} aria-pressed="true">
+          {t('category.all')}
+        </button>
+        {categories.map((category) => (
+          <button type="button" data-value={category.slug} data-label={t(category.key as UIKey)} aria-pressed="false">
+            {t(category.key as UIKey)}
+          </button>
         ))}
-        <a class="tag all" href="/blog/tags/">
-          {t('blog.allTags')} →
-        </a>
-      </nav>
-    )
-  }
+      </div>
+    </details>
+
+    <details class="filter-menu" data-filter="tag" name="blog-filter">
+      <summary>
+        <span>{t('tags.title')}: <span class="selected-label">{t('blog.allTags')}</span></span>
+        <span class="chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="options">
+        <button type="button" data-value="" data-label={t('blog.allTags')} aria-pressed="true">
+          {t('blog.allTags')}
+        </button>
+        {tags.map((tag) => (
+          <button type="button" data-value={tag.slug} data-label={tag.label} aria-pressed="false">
+            <bdi>{tag.label}</bdi>
+          </button>
+        ))}
+      </div>
+    </details>
+  </div>
 
   {
     posts.length > 0 ? (
-      <div class="grid">
+      <div class="grid" id="post-grid">
         {posts.map((post) => (
-          <PostCard post={post} />
+          <div class="post-item" data-category={post.data.category} data-tags={JSON.stringify(post.data.tags.map(tagSlug))}>
+            <PostCard post={post} />
+          </div>
         ))}
       </div>
     ) : (
@@ -53,12 +73,59 @@ const tags = await getTags();
       </p>
     )
   }
+  {posts.length > 0 && <p class="empty" id="filter-empty" role="status" hidden>{t('blog.noMatches')}</p>}
 </BaseLayout>
+
+<script>
+  const menus = [...document.querySelectorAll<HTMLDetailsElement>('#blog-filters .filter-menu')];
+  const cards = [...document.querySelectorAll<HTMLElement>('#post-grid .post-item')];
+  const emptyState = document.querySelector<HTMLElement>('#filter-empty');
+  let category = '';
+  let tag = '';
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!menus.some((menu) => menu.contains(event.target as Node))) {
+      menus.forEach((menu) => { menu.open = false; });
+    }
+  });
+
+  for (const menu of menus) {
+    menu.addEventListener('toggle', () => {
+      if (menu.open) menus.filter((other) => other !== menu).forEach((other) => { other.open = false; });
+    });
+
+    for (const button of menu.querySelectorAll<HTMLButtonElement>('.options button')) {
+      button.addEventListener('click', () => {
+        if (menu.dataset.filter === 'category') category = button.dataset.value ?? '';
+        else tag = button.dataset.value ?? '';
+
+        menu.querySelector<HTMLElement>('.selected-label')!.textContent = button.dataset.label ?? '';
+        for (const option of menu.querySelectorAll<HTMLButtonElement>('.options button')) {
+          option.setAttribute('aria-pressed', String(option === button));
+        }
+        menu.open = false;
+
+        let visible = 0;
+        for (const card of cards) {
+          const matchesCategory = !category || card.dataset.category === category;
+          const matchesTag = !tag || JSON.parse(card.dataset.tags ?? '[]').includes(tag);
+          card.hidden = !(matchesCategory && matchesTag);
+          if (!card.hidden) visible += 1;
+        }
+        if (emptyState) emptyState.hidden = visible > 0;
+      });
+    }
+  }
+</script>
 
 <style>
   .page-head {
-    max-width: var(--measure);
     margin-bottom: 2rem;
+    min-height: 10.5rem;
+    background-color: var(--bg-raised);
+    background-image: linear-gradient(270deg, rgba(12, 13, 18, 0.52), rgba(12, 13, 18, 0.12)), url('/images/blog_section_image.png');
+    background-size: cover;
+    background-position: center;
   }
 
   .page-head h1 {
@@ -68,16 +135,103 @@ const tags = await getTags();
 
   .page-head p {
     margin: 0;
+    max-width: var(--measure);
     color: var(--text-muted);
   }
 
-  .tag-bar {
+  @media (max-width: 40rem) {
+    .page-head { background-position: center, 30% center; }
+  }
+
+  .filters {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    align-items: flex-start;
+    gap: 0.75rem;
     padding-bottom: 1.5rem;
     margin-bottom: 1.75rem;
     border-bottom: 1px solid var(--border-soft);
+  }
+
+  .filter-menu {
+    position: relative;
+    flex: 0 1 16rem;
+    min-width: 0;
+  }
+
+  .filter-menu[open] { z-index: 5; }
+
+  .filter-menu summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    color: var(--text);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .filter-menu summary::-webkit-details-marker { display: none; }
+  .filter-menu summary:hover,
+  .filter-menu[open] summary { border-color: var(--accent); }
+
+  .filter-menu summary > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chevron {
+    flex: 0 0 0.5rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 150ms ease;
+  }
+
+  .filter-menu[open] .chevron { transform: rotate(225deg); }
+
+  .options {
+    position: absolute;
+    inset-block-start: calc(100% + 0.35rem);
+    inset-inline-start: 0;
+    width: 100%;
+    max-height: 18rem;
+    overflow-y: auto;
+    padding: 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 25%);
+  }
+
+  .options button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border: 0;
+    border-radius: calc(var(--radius) - 4px);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font: inherit;
+    text-align: start;
+  }
+
+  .options button:hover,
+  .options button:focus-visible,
+  .options button[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg-raised));
+    color: var(--text);
   }
 
   /* auto-fill, not auto-fit: with two posts on a wide screen, auto-fit would
@@ -90,16 +244,15 @@ const tags = await getTags();
     gap: 1rem;
   }
 
-  .count {
-    color: var(--text-faint);
-  }
-
-  .all {
-    border-style: dashed;
-  }
+  .post-item[hidden],
+  .empty[hidden] { display: none; }
 
   .empty {
     padding: 3rem 0;
     color: var(--text-muted);
+  }
+
+  @media (max-width: 30rem) {
+    .filter-menu { flex: 1 1 0; }
   }
 </style>

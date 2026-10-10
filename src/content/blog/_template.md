@@ -12,6 +12,21 @@ date: 2026-01-01
 # Required. Your name or your club handle. This is your portfolio credit.
 author: 'Your Name'
 
+# Optional. URL of your profile image; shown as a round avatar beside your
+# name on blog cards and in your writeup's author panel. HTTPS URLs and
+# site-relative paths such as /images/avatar.svg are supported.
+# authorImage: 'https://example.com/avatar.jpg'
+
+# Optional. Add any supported social profiles to the author panel.
+# Supported platforms: github, linkedin, x, instagram, youtube, discord,
+# telegram, tiktok, bluesky, mastodon, facebook, twitch, tryhackme,
+# hackthebox, website. Omit the field to show no social links.
+# authorSocials:
+#   - platform: github
+#     url: 'https://github.com/your-name'
+#   - platform: website
+#     url: 'https://example.com/'
+
 # Required, at least one. Lowercase. Reuse existing tags where they fit —
 # check /blog/tags to see what already exists.
 tags: ['web', 'sqli']

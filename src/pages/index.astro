@@ -1,22 +1,139 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ClubLandscape from '../components/ClubLandscape.astro';
 import { useTranslations } from '../i18n/ui';
+import { getPosts } from '../lib/posts';
+import { repo } from '../config';
 
 const t = useTranslations();
+const posts = await getPosts();
+const topics = [t('home.topicWeb'), t('home.topicCrypto'), t('home.topicLinux'), t('home.topicCTF')];
 ---
 
-{/*
-  Placeholder. Home is still ahead of us in the build order — replace this
-  whole body when it is built for real.
-*/}
 <BaseLayout>
-  <p class="placeholder">{t('home.placeholder')}</p>
-  <p><a href="/blog/">{t('home.toBlog')} →</a></p>
+  <div class="home">
+    <section class="hero-grid" aria-labelledby="hero-title">
+      <div class="hero">
+        <div class="landscape"><ClubLandscape /></div>
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span>{t('home.eyebrow')}</p>
+          <h1 id="hero-title">{t('home.title')}<br />{' '}{t('home.titleSecond')}</h1>
+          <p class="hero-description">{t('home.intro')}</p>
+          <a class="start-button" href="/blog/">{t('home.start')}<span aria-hidden="true">←</span></a>
+        </div>
+        <div class="hero-bottom">
+          <p>{t('home.topics')}</p>
+          <ul>{topics.map((topic) => <li>{topic}</li>)}</ul>
+        </div>
+      </div>
+
+      <div class="side-cards">
+        <a class="stat-card" href="/blog/">
+          <span class="stat-number">{String(posts.length).padStart(2, '0')}<span aria-hidden="true">↗</span></span>
+          <span>{t('home.stat')}</span>
+        </a>
+        <div class="promo-card contribution-card">
+          <div class="promo-copy"><h2>{t('home.shareTitle')}</h2><p>{t('home.shareText')}</p></div>
+          <div class="promo-bottom"><span>{t('home.shareFoot')}</span><a href={repo.url}>{t('home.shareAction')}<span aria-hidden="true">↖</span></a></div>
+        </div>
+        <div class="promo-card path-card">
+          <div class="promo-copy"><h2>{t('home.pathTitle')}</h2><p>{t('home.pathText')}</p></div>
+          <div class="promo-bottom"><span>{t('home.pathFoot')}</span><a href="/blog/tags/">{t('home.pathAction')}<span aria-hidden="true">↖</span></a></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </BaseLayout>
 
 <style>
-  .placeholder {
-    color: var(--text-muted);
-    max-width: var(--measure);
+  .home { padding-top: 0.25rem; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); gap: 1.3rem; }
+  .hero { position: relative; isolation: isolate; overflow: hidden; background: #152e27; color: #d1efdd; border-radius: var(--radius); display: flex; flex-direction: column; min-height: 450px; padding: 2.6rem 2.7rem 1.6rem; }
+  .hero-copy { position: relative; z-index: 1; max-width: 36rem; }
+  .eyebrow { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; font-size: 0.72rem; color: #a9cfb9; }
+  .eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: #83c8a3; }
+  h1 { margin: 0; font-size: clamp(2.2rem, 3.3vw, 3.1rem); line-height: 1.6; font-weight: 500; letter-spacing: -0.045em; }
+  .hero-description { max-width: 29rem; font-size: 0.95rem; line-height: 1.95; color: #b9d2c3; margin: 1.1rem 0 1.8rem; }
+  .start-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 1.4rem; min-width: 152px; padding: 0.45rem 1.1rem; border: 1.5px solid #8bc7a6; border-radius: 10px; color: #112b21; background: #c1e6cf; box-shadow: 4px 5px 0 #245b47; font-size: 1.1rem; text-decoration: none; transition: transform 150ms, box-shadow 150ms; }
+  .start-button span { font-family: var(--font-mono); font-size: 1.65rem; }
+  .start-button:hover { transform: translate(2px, 2px); box-shadow: 2px 3px 0 #245b47; }
+  .landscape { position: absolute; z-index: -1; width: 65%; inset-inline-end: -5%; bottom: -2px; line-height: 0; pointer-events: none; }
+  .landscape :global(svg) { width: 100%; height: auto; }
+  .hero-bottom { position: relative; margin-top: auto; padding-top: 2rem; }
+  .hero-bottom > p { margin: 0 0 0.45rem; font-size: 0.62rem; color: #a9cfb9; }
+  .hero-bottom ul { display: flex; gap: 1.2rem; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
+  .hero-bottom li { color: #c7e4d3; font-size: 0.75rem; font-weight: 600; }
+  .hero-bottom li + li::before { content: '+'; color: #a8c9b6; margin-inline-end: 1.2rem; }
+  .side-cards { display: grid; grid-template-rows: 0.72fr 1fr 1fr; gap: 0.85rem; }
+  .stat-card { display: flex; flex-direction: column; justify-content: center; padding: 1.1rem 1.4rem; background: var(--bg-raised); border-radius: var(--radius); text-decoration: none; color: var(--text-muted); font-size: 0.72rem; line-height: 1.7; }
+  .stat-number { display: flex; align-items: center; justify-content: space-between; color: var(--text); font-size: 1.8rem; font-family: var(--font-mono); font-weight: 600; }
+  .stat-number span { font-weight: 400; color: #b3acc7; font-size: 1.5rem; }
+  .promo-card { overflow: hidden; border-radius: var(--radius); display: flex; flex-direction: column; padding: 1.1rem 1.3rem 0; }
+  .promo-copy h2 { font-size: 1rem; line-height: 1.65; margin: 0 0 0.4rem; font-weight: 600; }
+  .promo-copy p { font-size: 0.72rem; line-height: 1.85; margin: 0 0 0.9rem; }
+  .contribution-card { color: #fff; background: radial-gradient(ellipse at 0 0, #6041ad, transparent 75%), #160e29; }
+  .contribution-card p { color: #ddd5eb; }
+  .promo-bottom { margin-top: auto; border-radius: 11px 11px 0 0; padding: 0.65rem 0.7rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
+  .promo-bottom > span { font-size: 0.58rem; }
+  .promo-bottom a { display: inline-flex; align-items: center; gap: 0.65rem; background: #322547; color: #e0d1ff; border-radius: 100px; padding: 0.3rem 0.7rem; font-size: 0.64rem; text-decoration: none; white-space: nowrap; }
+  .promo-bottom a:hover { text-decoration: underline; }
+  .contribution-card .promo-bottom { background: #ffffff13; color: #d4bff2; }
+  .path-card { background: #30202b; color: #f1dce6; }
+  .path-card p { color: #cfb4c2; }
+  .path-card .promo-bottom { background: #ffffff08; color: #f1a7c2; }
+  .path-card .promo-bottom a { background: #eda0bc; color: #301321; }
+  @media (min-width: 100rem) {
+    .hero { min-height: 546px; padding: 2.8rem 3rem 2rem; }
+    .hero-grid { gap: 1.6rem; }
+    .hero-description { font-size: 1.1rem; max-width: 36rem; }
+    .hero-copy { max-width: 39rem; }
+    .promo-card { padding: 1.4rem 1.6rem 0; }
+    .promo-copy h2 { font-size: 1.2rem; }
+    .promo-copy p { font-size: 0.87rem; }
+    .promo-bottom { padding: 0.8rem; }
+    .promo-bottom > span, .promo-bottom a { font-size: 0.75rem; }
+    .stat-card { font-size: 0.9rem; padding-inline: 2rem; }
+    .stat-number { font-size: 2rem; }
+  }
+  @media (max-width: 64rem) {
+    .hero { padding: 2rem; }
+    h1 { font-size: 2.3rem; }
+    .hero-grid { grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr); }
+    .hero-description { max-width: 23rem; }
+    .landscape { width: 60%; opacity: 0.65; }
+    .hero-bottom li { font-size: 0.65rem; }
+    .hero-bottom ul { gap: 0.7rem; }
+    .hero-bottom li + li::before { margin-inline-end: 0.7rem; }
+    .promo-card { padding-inline: 1rem; }
+    .promo-bottom { flex-wrap: wrap; }
+  }
+  @media (max-width: 48rem) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero { min-height: 440px; }
+    .hero-copy { max-width: 80%; }
+    .landscape { width: 66%; opacity: 1; }
+    .hero-bottom { max-width: 75%; }
+    .side-cards { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .stat-card { grid-column: 1 / -1; padding: 0.85rem 1.3rem; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1rem; }
+    .stat-number { gap: 0.7rem; }
+  }
+  @media (max-width: 28rem) {
+    .hero { padding: 1.6rem 1.35rem; min-height: 460px; }
+    .hero-copy { max-width: 100%; }
+    h1 { font-size: 2.05rem; }
+    .hero-description { font-size: 0.84rem; }
+    .landscape { width: 70%; opacity: 0.35; }
+    .hero-bottom { max-width: 100%; }
+    .side-cards { grid-template-columns: 1fr; }
+    .promo-card { min-height: 170px; padding: 1.2rem 1.3rem 0; }
+    .promo-copy h2 { font-size: 1.1rem; }
+    .promo-copy p { font-size: 0.8rem; }
+    .promo-bottom { padding: 0.7rem; }
+    .promo-bottom a { font-size: 0.74rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .start-button { transition: none; }
+    .start-button:hover { transform: none; }
   }
 </style>

@@ -2,6 +2,12 @@
 title: 'Common modulus attack — recovering a flag from two ciphertexts'
 date: 2026-03-04
 author: 'Example Member'
+authorImage: '/images/author-placeholder.svg'
+authorSocials:
+  - platform: x
+    url: 'https://x.com/example_member'
+  - platform: linkedin
+    url: 'https://www.linkedin.com/in/example-member/'
 tags: ['crypto', 'rsa', 'number-theory']
 category: ctf
 ctf: 'Internal Practice Set'

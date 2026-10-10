@@ -52,6 +52,27 @@ export const locales = {
 
 export type Locale = keyof typeof locales;
 
+/** Social services supported by writeup author profiles. */
+export const authorSocialPlatforms = [
+  'github',
+  'linkedin',
+  'x',
+  'instagram',
+  'youtube',
+  'discord',
+  'telegram',
+  'tiktok',
+  'bluesky',
+  'mastodon',
+  'facebook',
+  'twitch',
+  'tryhackme',
+  'hackthebox',
+  'website',
+] as const;
+
+export type AuthorSocialPlatform = (typeof authorSocialPlatforms)[number];
+
 /**
  * The site's language. All chrome — nav, footer, page headings — renders in
  * this one language; there is no language switcher.
@@ -71,8 +92,8 @@ export const siteLocale: Locale = 'ar';
 export const nav = [
   { key: 'nav.home', href: '/' },
   { key: 'nav.blog', href: '/blog/' },
-  { key: 'nav.roadmap', href: '/roadmap/' },
-  { key: 'nav.contact', href: '/contact/' },
+  { key: 'nav.resources', href: '/resources/' },
+  { key: 'nav.leaderboard', href: '/leaderboard/' },
 ] as const;
 
 /**

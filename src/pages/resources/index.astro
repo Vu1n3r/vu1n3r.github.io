@@ -1,0 +1,176 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResourceRoadmap from '../../components/ResourceRoadmap.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+const categories = [
+  { id: 'roadmap', label: t('resources.roadmap') },
+  { id: 'archive', label: t('resources.archive'), empty: t('resources.archiveEmpty') },
+  { id: 'notes', label: t('resources.notes'), empty: t('resources.notesEmpty') },
+];
+---
+
+<BaseLayout title={t('nav.resources')}>
+  <div class="resources-page">
+    <header class="page-head resource-header" data-active="none">
+      <div class="header-visuals" aria-hidden="true">
+        <div class="mosaic">
+          <div class="mosaic-slice notes-slice"></div>
+          <div class="mosaic-slice archive-slice"></div>
+          <div class="mosaic-slice roadmap-slice"></div>
+          <svg class="mosaic-seams" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M31 0 38 100M64.5 0 71.5 100" />
+          </svg>
+        </div>
+        <div class="active-image active-roadmap"></div>
+        <div class="active-image active-archive"></div>
+        <div class="active-image active-notes"></div>
+      </div>
+      <div class="header-shade" aria-hidden="true"></div>
+      <div class="header-copy">
+        <h1>{t('nav.resources')}</h1>
+        <p>{t('resources.intro')}</p>
+      </div>
+    </header>
+
+    <div class="category-bar" role="tablist" aria-label={t('nav.resources')}>
+      {categories.map((category, index) => (
+        <div class="category">
+          <button
+            type="button"
+            role="tab"
+            id={`tab-${category.id}`}
+            data-section={category.id}
+            aria-controls={`panel-${category.id}`}
+            aria-selected="false"
+            tabindex={index === 0 ? 0 : -1}
+          >
+            {category.label}
+          </button>
+        </div>
+      ))}
+    </div>
+
+    <p class="select-prompt" id="resource-prompt">{t('resources.selectPrompt')}</p>
+
+    {categories.map((category) => (
+      <section
+        class="resource-panel"
+        role="tabpanel"
+        id={`panel-${category.id}`}
+        aria-labelledby={`tab-${category.id}`}
+        tabindex="0"
+        hidden
+      >
+        {category.id === 'roadmap' ? <ResourceRoadmap /> : <p class="empty-state">{category.empty}</p>}
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.resources-page');
+
+  if (root) {
+    const header = root.querySelector<HTMLElement>('.resource-header')!;
+    const prompt = root.querySelector<HTMLElement>('#resource-prompt')!;
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('.category-bar [role="tab"]')];
+    const panels = tabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls')!)!);
+
+    function selectTab(index: number, focus = false) {
+      const selectedTab = tabs[index];
+      header.dataset.active = selectedTab.dataset.section ?? 'none';
+      prompt.hidden = true;
+
+      tabs.forEach((tab, tabIndex) => {
+        const selected = tabIndex === index;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        panels[tabIndex].hidden = !selected;
+      });
+
+      if (focus) selectedTab.focus();
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectTab(index));
+      tab.addEventListener('keydown', (event) => {
+        const right = document.documentElement.dir === 'rtl' ? -1 : 1;
+        let next: number;
+        if (event.key === 'ArrowRight') next = (index + right + tabs.length) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (index - right + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+
+        event.preventDefault();
+        selectTab(next, true);
+      });
+    });
+
+    root.querySelectorAll<HTMLAnchorElement>('.stage-nav a').forEach((link) => {
+      link.addEventListener('click', () => {
+        const stage = root.querySelector<HTMLDetailsElement>(link.getAttribute('href')!);
+        if (stage) stage.open = true;
+      });
+    });
+  }
+</script>
+
+<style>
+  .resource-header { position: relative; isolation: isolate; overflow: hidden; min-height: 10.5rem; background: var(--bg-raised); }
+  .header-visuals, .mosaic, .active-image, .header-shade { position: absolute; inset: 0; }
+  .header-visuals { z-index: -2; }
+  .mosaic, .active-image { transition: opacity 400ms ease; }
+  .mosaic { opacity: 1; }
+  .resource-header[data-active='roadmap'] .mosaic,
+  .resource-header[data-active='archive'] .mosaic,
+  .resource-header[data-active='notes'] .mosaic { opacity: 0; }
+
+  /* Every scene occupies the full header in both states. Clipping only reveals
+     one part of each scene in the initial mosaic, so selection never zooms it. */
+  .mosaic-slice, .active-image { background-size: cover; background-position: center; background-repeat: no-repeat; }
+  .mosaic-slice { position: absolute; inset: 0; }
+  .notes-slice { clip-path: polygon(0 0, 31% 0, 38% 100%, 0 100%); }
+  .archive-slice { clip-path: polygon(30.5% 0, 64.5% 0, 71.5% 100%, 37.5% 100%); }
+  .roadmap-slice { clip-path: polygon(64% 0, 100% 0, 100% 100%, 71% 100%); }
+  .mosaic-seams { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #c5d0c9; stroke-opacity: 0.35; stroke-width: 1.5; }
+  .mosaic-seams path { vector-effect: non-scaling-stroke; }
+
+  .active-image { opacity: 0; }
+  .roadmap-slice, .active-roadmap { background-image: url('/images/roadmap_section_image.png'); background-position: center 17%; }
+  .archive-slice, .active-archive { background-image: url('/images/archive_section_image.png'); }
+  .notes-slice, .active-notes { background-image: url('/images/notes_section_image.png'); background-position: center 65%; }
+  .resource-header[data-active='roadmap'] .active-roadmap,
+  .resource-header[data-active='archive'] .active-archive,
+  .resource-header[data-active='notes'] .active-notes { opacity: 1; }
+  .header-shade { z-index: -1; background: linear-gradient(270deg, rgba(12, 13, 18, 0.88), rgba(12, 13, 18, 0.65) 55%, rgba(12, 13, 18, 0.58)); }
+  .header-copy { position: relative; }
+  h1 { margin: 0; font-size: 2rem; }
+  .page-head p { margin: 0.5rem 0 0; color: var(--text-muted); }
+
+  .category-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1.5rem; border-bottom: 1px solid var(--border-soft); background: transparent; }
+  .category { position: relative; min-width: 0; background: transparent; }
+  .category + .category::before { content: ''; position: absolute; inset-block: 1rem; inset-inline-start: 0; width: 1px; background: var(--border); }
+  .category button { position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-height: 2rem; padding: 1.15rem 1rem; border: 0; background: transparent; color: var(--text-muted); cursor: pointer; font: inherit; font-size: 1.3rem; font-weight: 400; text-align: center; transition: color 180ms ease; }
+  .category button:hover, .category button[aria-selected='true'] { color: var(--accent); }
+  .category button[aria-selected='true'] { font-weight: 700; }
+  .category button[aria-selected='true']::after { content: ''; position: absolute; inset-inline: 0; bottom: -1px; height: 2px; background: var(--accent); box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .category button:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 4px; }
+
+  .select-prompt, .resource-panel { padding: 2rem 0.5rem; }
+  .select-prompt, .empty-state { margin: 0; color: var(--text-muted); }
+  .resource-panel[hidden], .select-prompt[hidden] { display: none; }
+
+  @media (max-width: 30rem) {
+    .category button { padding: 0.9rem 0.3rem; }
+  }
+  @media (max-width: 22rem) {
+    .category button { font-size: 1.1rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mosaic, .active-image { transition: none; }
+    .category button { transition: none; }
+  }
+</style>

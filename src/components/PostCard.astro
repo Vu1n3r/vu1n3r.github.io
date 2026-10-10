@@ -24,13 +24,12 @@ const rating = postRating(post.data);
 const t = useTranslations();
 const categoryKey = categories.find((c) => c.slug === category)!.key;
 
-// The card runs in the site's direction. Only the title carries the post's
-// own language, so an English heading renders left-to-right inside the
-// right-to-left grid without dragging the metadata row with it.
+// The card runs in the site's direction. Only the title uses the post's
+// language; metadata labels follow the website locale.
 const postLocale = locales[lang];
 ---
 
-<article class="card" data-level={rating?.level}>
+<article class="card" data-category={category} data-level={rating?.level}>
   <div class="top">
     {/* Raised above the stretched card link so it stays clickable. */}
     <a class="cat" href={categoryHref(category)}>{t(categoryKey as UIKey)}</a>
@@ -40,7 +39,7 @@ const postLocale = locales[lang];
     {
       lang !== siteLocale && (
         <span class="badge" lang={postLocale.htmlLang}>
-          {postLocale.nativeLabel}
+          <span>{postLocale.nativeLabel}</span>
         </span>
       )
     }
@@ -55,7 +54,12 @@ const postLocale = locales[lang];
     <a href={postHref(post.id)}>{title}</a>
   </h2>
 
-  {ctf && <p class="source">{ctf}</p>}
+  <div class="byline">
+    {ctf && <p class="source"><span>{t('post.platform')}: <bdi>{ctf}</bdi></span></p>}
+    <p class="author">
+      <span>{t('post.author')}: <bdi>{author}</bdi></span>
+    </p>
+  </div>
 
   <footer class="bottom">
     <ul class="tags">
@@ -90,32 +94,35 @@ const postLocale = locales[lang];
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
     height: 100%;
-    padding: 1.1rem 1.2rem;
+    padding: 1.4rem;
     border: 1px solid var(--border-soft);
     border-radius: var(--radius);
     background: var(--bg-raised);
   }
 
-  /* A quiet rating cue on the card's leading edge — readable at a glance
-     across a grid without adding another coloured chip to every card. The
-     colour comes from --level, resolved in global.css from data-level; an
-     unrated card leaves the attribute off and keeps the default border. */
+  /* Use the card's full width so the accent border follows its corner radius.
+     A narrow filled strip would flatten its 14px radius down to the strip's
+     own 3px width. */
   .card::before {
     content: '';
     position: absolute;
-    inset-block: -1px;
-    inset-inline-start: -1px;
-    width: 3px;
-    border-start-start-radius: var(--radius);
-    border-end-start-radius: var(--radius);
-    background: var(--level, var(--border));
+    inset-block: 0;
+    inset-inline: -1px;
+    border-inline-start: 3px solid var(--level, var(--border));
+    border-radius: inherit;
+    pointer-events: none;
   }
 
   .card:hover,
   .card:focus-within {
     border-color: var(--accent);
+  }
+
+  .card[data-category='ctf']:hover,
+  .card[data-category='ctf']:focus-within {
+    border-color: var(--level);
   }
 
   .top {
@@ -139,6 +146,11 @@ const postLocale = locales[lang];
     text-decoration: underline;
   }
 
+  .card[data-category='ctf']:hover .cat,
+  .card[data-category='ctf']:focus-within .cat {
+    color: var(--level);
+  }
+
   .sep {
     color: var(--border);
   }
@@ -151,6 +163,15 @@ const postLocale = locales[lang];
     font-size: 0.7rem;
     unicode-bidi: isolate;
   }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .badge span { transform: translateY(2px); }
 
   .draft {
     border-color: var(--level-medium);
@@ -182,11 +203,27 @@ const postLocale = locales[lang];
     color: var(--link);
   }
 
-  .source {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.82rem;
+  .card[data-category='ctf']:hover h2 a,
+  .card[data-category='ctf']:focus-within h2 a {
+    color: var(--level);
   }
+
+  .card[data-category='ctf'] :global(a.tag:hover),
+  .card[data-category='ctf'] :global(a.tag:focus-visible) {
+    border-color: var(--level);
+    color: var(--level);
+  }
+
+  .byline { display: grid; gap: 0.3rem; }
+
+  .source,
+  .author {
+    margin: 0;
+    color: var(--text-faint);
+    font-size: 0.84rem;
+  }
+
+  .author { color: var(--text-muted); }
 
   .bottom {
     display: flex;

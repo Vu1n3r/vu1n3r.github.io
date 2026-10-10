@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import {
+  authorSocialPlatforms,
   categories,
   categorySlugs,
   difficultyLevels,
@@ -37,6 +38,23 @@ const blog = defineCollection({
       // The name the writeup is credited to. This is the portfolio value —
       // never publish a writeup without one.
       author: z.string().min(1, 'author is required'),
+
+      // Optional avatar shown in the author panel on writeup pages.
+      // A site-relative URL keeps bundled placeholder images portable.
+      authorImage: z.string().refine((value) => {
+        if (/^\/(?!\/)\S+$/.test(value)) return true;
+        try {
+          return ['http:', 'https:'].includes(new URL(value).protocol);
+        } catch {
+          return false;
+        }
+      }, 'authorImage must be an HTTP(S) URL or a site-relative path').optional(),
+
+      // Public author profiles shown in the author panel below a writeup.
+      authorSocials: z.array(z.object({
+        platform: z.enum(authorSocialPlatforms),
+        url: z.string().url(),
+      }).strict()).optional(),
 
       tags: z
         .array(z.string())

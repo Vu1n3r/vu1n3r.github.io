@@ -2,6 +2,12 @@
 title: 'Pickle Rick — from a page source comment to root'
 date: 2026-02-11
 author: 'Example Member'
+authorImage: '/images/author-placeholder.svg'
+authorSocials:
+  - platform: x
+    url: 'https://x.com/example_member'
+  - platform: linkedin
+    url: 'https://www.linkedin.com/in/example-member/'
 tags: ['web', 'thm', 'enumeration', 'sudo']
 category: ctf
 ctf: 'TryHackMe'

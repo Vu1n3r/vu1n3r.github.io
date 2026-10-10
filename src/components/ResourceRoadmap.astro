@@ -1,0 +1,102 @@
+---
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+const stages = [
+  {
+    id: 'fundamentals',
+    title: t('resources.stageFundamentals'),
+    description: t('resources.stageFundamentalsDescription'),
+    topics: [
+      { title: t('resources.topicNetworks'), description: t('resources.topicNetworksDescription') },
+      { title: t('resources.topicLinux'), description: t('resources.topicLinuxDescription'), source: 'OverTheWire: Bandit', href: 'https://overthewire.org/wargames/bandit/' },
+      { title: t('resources.topicWeb'), description: t('resources.topicWebDescription'), source: 'MDN Web Docs', href: 'https://developer.mozilla.org/en-US/docs/Learn_web_development' },
+    ],
+  },
+  {
+    id: 'security',
+    title: t('resources.stageSecurity'),
+    description: t('resources.stageSecurityDescription'),
+    topics: [
+      { title: t('resources.topicWebSecurity'), description: t('resources.topicWebSecurityDescription'), source: 'Web Security Academy', href: 'https://portswigger.net/web-security/getting-started' },
+    ],
+  },
+  { id: 'practice', title: t('resources.stagePractice'), description: t('resources.stagePracticeDescription'), topics: [] },
+  { id: 'advanced', title: t('resources.stageAdvanced'), description: t('resources.stageAdvancedDescription'), topics: [] },
+  { id: 'projects', title: t('resources.stageProjects'), description: t('resources.stageProjectsDescription'), topics: [] },
+];
+---
+
+<div class="roadmap-intro">
+  <h2>{t('resources.roadmap')}</h2>
+  <p>{t('resources.roadmapIntro')}</p>
+</div>
+
+<div class="roadmap-layout">
+  <nav class="stage-nav" aria-label={t('resources.stageNav')}>
+    <ol>
+      {stages.map((stage, index) => (
+        <li><a href={`#stage-${stage.id}`}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{stage.title}</a></li>
+      ))}
+    </ol>
+  </nav>
+
+  <div class="stages">
+    {stages.map((stage, index) => (
+      <details class="stage" id={`stage-${stage.id}`} open={index === 0}>
+        <summary>
+          <span class="stage-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+          <span>{stage.title}</span>
+          <span class="chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="stage-body">
+          <p>{stage.description}</p>
+          {stage.topics.length > 0 && (
+            <div class="topic-grid">
+              {stage.topics.map((topic) => (
+                <article class="topic-card">
+                  <h3>{topic.title}</h3>
+                  <p>{topic.description}</p>
+                  {topic.href && (
+                    <a href={topic.href} target="_blank" rel="noopener noreferrer" aria-label={`${t('resources.openResource')}: ${topic.source} (${topic.title})`}>
+                      {topic.source}<span aria-hidden="true"> ↗</span>
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </details>
+    ))}
+  </div>
+</div>
+
+<style>
+  .roadmap-intro { margin-bottom: 1.5rem; }
+  h2 { margin: 0 0 0.4rem; font-size: 1.5rem; color: var(--text); }
+  .roadmap-intro p, .stage-body > p { margin: 0; color: var(--text-muted); }
+  .roadmap-layout { display: grid; grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+  .stage-nav { border-inline-start: 1px solid var(--border-soft); }
+  .stage-nav ol { margin: 0; padding: 0; list-style: none; }
+  .stage-nav a { display: flex; align-items: baseline; gap: 0.65rem; padding: 0.65rem 0.8rem; border-inline-start: 2px solid transparent; color: var(--text-muted); text-decoration: none; }
+  .stage-nav a:hover, .stage-nav a:focus-visible { border-inline-start-color: var(--accent); color: var(--accent); }
+  .stage-nav a span { color: var(--text-faint); font-family: var(--font-mono); font-size: 0.72rem; }
+  .stages { display: grid; gap: 0.7rem; min-width: 0; }
+  .stage { border: 1px solid var(--border-soft); border-radius: var(--radius); background: var(--bg-raised); scroll-margin-top: 1rem; }
+  .stage[open] { border-color: var(--border); }
+  .stage summary { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1.1rem; color: var(--text); font-weight: 600; cursor: pointer; list-style: none; }
+  .stage summary::-webkit-details-marker { display: none; }
+  .stage-number { color: var(--accent); font-family: var(--font-mono); font-size: 0.82rem; font-weight: 400; }
+  .chevron { width: 0.45rem; height: 0.45rem; margin-inline-start: auto; border-inline-end: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 180ms ease; }
+  .stage[open] .chevron { transform: rotate(225deg); }
+  .stage-body { padding: 0 1.1rem 1.1rem; }
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 0.8rem; margin-top: 1rem; }
+  .topic-card { min-width: 0; padding: 1rem; border: 1px solid var(--border-soft); border-radius: calc(var(--radius) - 4px); background: var(--bg); }
+  .topic-card h3 { margin: 0 0 0.4rem; color: var(--text); font-size: 1rem; }
+  .topic-card p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+  .topic-card a { display: inline-block; margin-top: 0.8rem; color: var(--link); font-size: 0.88rem; text-decoration: none; }
+  .topic-card a:hover { text-decoration: underline; }
+  @media (max-width: 48rem) { .roadmap-layout { grid-template-columns: 1fr; gap: 1.25rem; } }
+  @media (prefers-reduced-motion: reduce) { .chevron { transition: none; } }
+</style>

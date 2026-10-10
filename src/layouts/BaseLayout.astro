@@ -57,7 +57,7 @@ const canonical = Astro.site
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=a69e71b7" />
     <link rel="canonical" href={canonical} />
 
 
@@ -88,7 +88,7 @@ const canonical = Astro.site
 
 <style>
   .main {
-    padding-block: 2.5rem 1rem;
+    padding-block: 3.5rem 1rem;
     min-height: 60vh;
   }
 
@@ -97,6 +97,10 @@ const canonical = Astro.site
   }
 
   .main.wide {
-    max-width: 76rem;
+    max-width: 84rem;
+  }
+
+  @media (max-width: 40rem) {
+    .main { padding-block-start: 1.5rem; }
   }
 </style>

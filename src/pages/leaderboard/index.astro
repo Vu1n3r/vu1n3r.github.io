@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+---
+
+<BaseLayout title={t('nav.leaderboard')}>
+  <header class="page-head">
+    <h1>{t('nav.leaderboard')}</h1>
+    <p>{t('leaderboard.empty')}</p>
+  </header>
+</BaseLayout>
+
+<style>
+  h1 { margin: 0 0 0.5rem; font-size: 2rem; }
+  p { margin: 0; color: var(--text-muted); }
+</style>

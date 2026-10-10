@@ -1,41 +1,49 @@
 /* Site-wide styles. No framework — this site is small enough that a
    stylesheet is cheaper than a build-time CSS dependency. */
 
+@font-face {
+  font-family: 'STC';
+  src: url('/fonts/stc-regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
-  --bg: #0d1117;
-  --bg-raised: #161b22;
-  --bg-inset: #010409;
-  --border: #30363d;
-  --border-soft: #21262d;
-  --text: #e6edf3;
-  --text-muted: #9198a1;
-  --text-faint: #6e7681;
-  --accent: #3fb950;
-  --accent-dim: #2ea043;
-  --link: #58a6ff;
+  --bg: #101116;
+  --bg-raised: #1a1c24;
+  --bg-inset: #0c0d12;
+  --border: #3d4050;
+  --border-soft: #2b2e3b;
+  --text: #eeeef4;
+  --text-muted: #b4b5c5;
+  --text-faint: #9c9fb3;
+  --accent: #75a58e;
+  --accent-dim: #92bea8;
+  --link: #9bcbb2;
 
   /* Rating levels. Difficulty and severity are separate scales but share one
      palette, keyed by level name: green reads as good news on both, red as
      bad. 'medium' is the same colour on either scale, deliberately. Severity
      follows the usual five-step ramp so it looks like every other triage
      dashboard a member has seen. */
-  --level-easy: #3fb950;
-  --level-medium: #d29922;
-  --level-hard: #f85149;
+  --level-easy: #72d4a0;
+  --level-medium: #e7bd65;
+  --level-hard: #ff858b;
 
-  --level-critical: #f85149;
-  --level-high: #e8823a;
-  --level-low: #3fb950;
-  --level-info: #58a6ff;
+  --level-critical: #ff858b;
+  --level-high: #f2a66e;
+  --level-low: #72d4a0;
+  --level-info: #83b8fa;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+  --font-sans: 'STC', 'Noto Sans Arabic', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
     'Liberation Mono', monospace;
 
   --measure: 68ch;
-  --page: 1100px;
-  --radius: 6px;
+  --page: 1280px;
+  --radius: 14px;
 
   color-scheme: dark;
 }
@@ -60,7 +68,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -292,6 +300,7 @@ a.tag:hover {
   overflow-x: auto;
   line-height: 1.55;
   tab-size: 4;
+  color-scheme: dark;
 }
 
 .prose pre code {
@@ -365,4 +374,27 @@ a.tag:hover {
 .tag,
 time {
   unicode-bidi: isolate;
+}
+
+/* Shared archive and article surfaces. */
+.page-head {
+  padding: 1.75rem 2rem;
+  border-radius: var(--radius);
+  background: #252033;
+}
+
+.post {
+  padding: 1.75rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+@media (max-width: 40rem) {
+  .page-head { padding: 1.25rem; }
+  .post { padding: 1rem; }
+}
+
+@media (min-width: 100rem) {
+  :root { --page: 1560px; }
 }

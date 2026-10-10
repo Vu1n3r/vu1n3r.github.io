@@ -73,9 +73,9 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     color: var(--link);
   }
 
-  /* Must match the post page's side-column breakpoint (72rem): the list only
+  /* Must match the post page's side-column breakpoint (80rem): the list only
      goes sticky once it is actually in the outer column. */
-  @media (min-width: 72rem) {
+  @media (min-width: 80rem) {
     .toc {
       position: sticky;
       top: 5rem;

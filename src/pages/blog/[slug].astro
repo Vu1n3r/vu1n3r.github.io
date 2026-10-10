@@ -4,6 +4,7 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
+import AuthorCard from '../../components/AuthorCard.astro';
 import { useTranslations, type UIKey } from '../../i18n/ui';
 import { getPosts, tagHref, postHref, postRating } from '../../lib/posts';
 import { locales, siteLocale } from '../../config';
@@ -26,7 +27,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 const { post, newer, older } = Astro.props;
-const { title, date, author, tags, ctf, draft, lang } = post.data;
+const { title, date, author, authorImage, authorSocials, tags, ctf, draft, lang } = post.data;
 
 // Difficulty on a CTF writeup, severity on a bug bounty report, null on a
 // study note. See postRating() — the page never reads either field directly.
@@ -58,8 +59,6 @@ const { Content, headings } = await render(post);
 
       <div class="meta">
         <FormattedDate date={date} />
-        <span class="sep" aria-hidden="true">·</span>
-        <span class="author">{author}</span>
         {ctf && <><span class="sep" aria-hidden="true">·</span><span>{ctf}</span></>}
         {
           rating && (
@@ -74,14 +73,6 @@ const { Content, headings } = await render(post);
         }
       </div>
 
-      {
-        lang !== siteLocale && (
-          <p class="lang-notice" lang={content.htmlLang}>
-            {t('post.translatedNotice')}
-          </p>
-        )
-      }
-
       {draft && <p class="draft-notice">{t('post.draft')}</p>}
 
       <ul class="tags">
@@ -94,6 +85,8 @@ const { Content, headings } = await render(post);
         ))}
       </ul>
     </header>
+
+    <AuthorCard name={author} image={authorImage} socials={authorSocials} locale={siteLocale} />
 
     {/* Direction is already on <html>; this only names the language. */}
     <div class="prose" lang={content.htmlLang}>
@@ -151,7 +144,7 @@ const { Content, headings } = await render(post);
   /* Wider than the site's default measure: writeups are screenshot-heavy
      and terminal output is long, and 68ch renders both too small. */
   .layout {
-    --post-measure: 44rem;
+    --post-measure: 58rem;
   }
 
   .eyebrow {
@@ -170,7 +163,6 @@ const { Content, headings } = await render(post);
 
   .head {
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-soft);
   }
 
   .head h1 {
@@ -188,19 +180,8 @@ const { Content, headings } = await render(post);
     font-size: 0.85rem;
   }
 
-  .author {
-    color: var(--text-muted);
-  }
-
   .sep {
     color: var(--border);
-  }
-
-  .lang-notice {
-    margin: 1rem 0 0;
-    color: var(--text-faint);
-    font-size: 0.85rem;
-    unicode-bidi: isolate;
   }
 
   .draft-notice {
@@ -250,10 +231,10 @@ const { Content, headings } = await render(post);
     display: none;
   }
 
-  /* 72rem = article (44rem) + gap (3.5rem) + contents (15rem) + page gutter.
+  /* 80rem fits the article (58rem), gap (3.5rem), contents (15rem), and gutters.
      The sidebar only appears once all of that fits without borrowing from
      the article. */
-  @media (min-width: 72rem) {
+  @media (min-width: 80rem) {
     .layout {
       grid-template-columns: minmax(0, var(--post-measure)) minmax(12rem, 15rem);
     }
